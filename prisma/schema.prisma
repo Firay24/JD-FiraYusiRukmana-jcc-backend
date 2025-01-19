@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,33 +7,312 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// #region Role
 model Role {
-  Id   String   @id
-  Name RoleType
-  User User[]
+  Id         String    @id
+  Name       RoleType
+  DateCreate DateTime  @default(now())
+  DateUpdate DateTime? @updatedAt
+  User       User[]
 }
 
-// #endregion
-
-// #region User
 model User {
-  Id         String       @id
-  DateCreate DateTime     @default(now())
-  DateUpdate DateTime?    @updatedAt
-  RoleId     String
-  FirstName  String
-  LastName   String?
-  Email      String       @unique
-  Password   String
-  Avatar     String?
-  Status     ActiveStatus @default(ACTIVE)
-  Role       Role         @relation(fields: [RoleId], references: [Id], onDelete: Restrict)
+  Id                            String                   @id
+  DateCreate                    DateTime                 @default(now())
+  DateUpdate                    DateTime?                @updatedAt
+  CreatedBy                     String?
+  UpdatedBy                     String?
+  Name                          String
+  Username                      String
+  Password                      String
+  RoleId                        String
+  Birthdate                     DateTime
+  PhoneNumber                   String
+  Gender                        Boolean
+  Email                         String?                  @unique
+  Status                        ActiveStatus             @default(ACTIVE)
+  CompetitionCreated            Competition[]            @relation("userCreated")
+  CompetitionUpdated            Competition[]            @relation("userUpdated")
+  CompetitionParticipantCreated CompetitionParticipant[] @relation("userCreated")
+  CompetitionParticipantUpdated CompetitionParticipant[] @relation("userUpdated")
+  CompetitionRoomCreated        CompetitionRoom[]        @relation("userCreated")
+  CompetitionRoomUpdated        CompetitionRoom[]        @relation("userUpdated")
+  CompetitionRoom               CompetitionRoom[]
+  DiscussionCreated             Discussion[]             @relation("userCreated")
+  DiscussionUpdated             Discussion[]             @relation("userUpdated")
+  ExamCreated                   Exam[]                   @relation("userCreated")
+  ExamUpdated                   Exam[]                   @relation("userUpdated")
+  KisiCreated                   Kisi[]                   @relation("userCreated")
+  KisiUpdated                   Kisi[]                   @relation("userUpdated")
+  NewsCreated                   News[]                   @relation("userCreated")
+  NewsUpdated                   News[]                   @relation("userUpdated")
+  OptionCreated                 Option[]                 @relation("userCreated")
+  OptionUpdated                 Option[]                 @relation("userUpdated")
+  PaymentCreated                Payment[]                @relation("userCreated")
+  PaymentUpdated                Payment[]                @relation("userUpdated")
+  QuestionCreated               Question[]               @relation("userCreated")
+  QuestionUpdated               Question[]               @relation("userUpdated")
+  RegionCreated                 Region[]                 @relation("userCreated")
+  RegionUpdated                 Region[]                 @relation("userUpdated")
+  SeasonCreated                 Season[]                 @relation("userCreated")
+  SeasonUpdated                 Season[]                 @relation("userUpdated")
+  StudentCreated                Student[]                @relation("userCreated")
+  StudentUpdated                Student[]                @relation("userUpdated")
+  Student                       Student[]
+  SubjectCreated                Subject[]                @relation("userCreated")
+  SubjectUpdated                Subject[]                @relation("userUpdated")
+  SupervisorCreated             Supervisor[]             @relation("userCreated")
+  SupervisorUpdated             Supervisor[]             @relation("userUpdated")
+  TryoutCreated                 Tryout[]                 @relation("userCreated")
+  TryoutUpdated                 Tryout[]                 @relation("userUpdated")
+  Role                          Role                     @relation(fields: [RoleId], references: [Id])
 }
 
-// #endregion
+model Student {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  CreatedBy              String?
+  UpdatedBy              String?
+  Address                String
+  Class                  String
+  NIK                    String
+  FatherName             String
+  MotherName             String
+  IdUser                 String
+  PhotoPath              String
+  Birthdate              DateTime
+  UserId                 String?
+  CompetitionParticipant CompetitionParticipant[]
+  UserCreated            User?                    @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated            User?                    @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+  User                   User?                    @relation(fields: [UserId], references: [Id])
+}
 
-// #region Enum
+model Season {
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  Name        String
+  StartDate   DateTime
+  EndDate     DateTime
+  Competition Competition[]
+  UserCreated User?         @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated User?         @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Subject {
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  Name        String
+  Competition Competition[]
+  UserCreated User?         @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated User?         @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Competition {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  CreatedBy              String?
+  UpdatedBy              String?
+  Name                   String
+  Date                   DateTime
+  Level                  Int
+  Stage                  String
+  Price                  Int
+  SeasonId               String
+  SubjectId              String
+  UserCreated            User?                    @relation("userCreated", fields: [CreatedBy], references: [Id])
+  Season                 Season                   @relation(fields: [SeasonId], references: [Id])
+  Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
+  UserUpdated            User?                    @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+  CompetitionParticipant CompetitionParticipant[]
+  CompetitionRoom        CompetitionRoom[]
+  Discussion             Discussion[]
+  Exam                   Exam[]
+  Kisi                   Kisi[]
+  Tryout                 Tryout[]
+}
+
+model Exam {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  CreatedBy     String?
+  UpdatedBy     String?
+  CompetitionId String
+  Correct       Int
+  Incorrect     Int
+  Score         Int
+  QuestionCode  String
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  UserCreated   User?       @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated   User?       @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Region {
+  Id           String    @id
+  DateCreate   DateTime  @default(now())
+  DateUpdate   DateTime? @updatedAt
+  CreatedBy    String?
+  UpdatedBy    String?
+  Name         String
+  RegionDetail String
+  UserCreated  User?     @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated  User?     @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Supervisor {
+  Id              String            @id
+  DateCreate      DateTime          @default(now())
+  DateUpdate      DateTime?         @updatedAt
+  CreatedBy       String?
+  UpdatedBy       String?
+  Name            String
+  Birthdate       DateTime
+  PhoneNumber     String
+  CompetitionRoom CompetitionRoom[]
+  UserCreated     User?             @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated     User?             @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model CompetitionRoom {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  CreatedBy              String?
+  UpdatedBy              String?
+  Name                   String
+  CompetitionId          String
+  SupervisorId           String
+  userId                 String?
+  CompetitionParticipant CompetitionParticipant[]
+  Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
+  UserCreated            User?                    @relation("userCreated", fields: [CreatedBy], references: [Id])
+  Supervisor             Supervisor               @relation(fields: [SupervisorId], references: [Id])
+  UserUpdated            User?                    @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+  User                   User?                    @relation(fields: [userId], references: [Id])
+}
+
+model CompetitionParticipant {
+  Id                String           @id
+  DateCreate        DateTime         @default(now())
+  DateUpdate        DateTime?        @updatedAt
+  CreatedBy         String?
+  UpdatedBy         String?
+  StudentId         String
+  CompetitionId     String
+  CompetitionRoomId String?
+  PaymentId         String?
+  Attedance         Boolean
+  Score             Int
+  Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
+  CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
+  UserCreated       User?            @relation("userCreated", fields: [CreatedBy], references: [Id])
+  Student           Student          @relation(fields: [StudentId], references: [Id])
+  UserUpdated       User?            @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Kisi {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  CreatedBy     String?
+  UpdatedBy     String?
+  Content       String
+  CompetitionId String
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  UserCreated   User?       @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated   User?       @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Tryout {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  CreatedBy     String?
+  UpdatedBy     String?
+  Name          String
+  CompetitionId String
+  Question      Question[]
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  UserCreated   User?       @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated   User?       @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Question {
+  Id          String    @id
+  DateCreate  DateTime  @default(now())
+  DateUpdate  DateTime? @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  TryoutId    String
+  Content     String
+  Option      Option[]
+  UserCreated User?     @relation("userCreated", fields: [CreatedBy], references: [Id])
+  Tryout      Tryout    @relation(fields: [TryoutId], references: [Id])
+  UserUpdated User?     @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Option {
+  Id          String    @id
+  DateCreate  DateTime  @default(now())
+  DateUpdate  DateTime? @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  Answer      String
+  IsCorrect   Boolean
+  QuestionId  String
+  UserCreated User?     @relation("userCreated", fields: [CreatedBy], references: [Id])
+  Question    Question  @relation(fields: [QuestionId], references: [Id])
+  UserUpdated User?     @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Discussion {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  CreatedBy     String?
+  UpdatedBy     String?
+  Name          String
+  CompetitionId String
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  UserCreated   User?       @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated   User?       @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model Payment {
+  Id          String      @id
+  DateCreate  DateTime    @default(now())
+  DateUpdate  DateTime?   @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  Invoice     String
+  Date        DateTime
+  Amount      Int
+  Status      PaymentType
+  UserId      String
+  UserCreated User?       @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated User?       @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
+model News {
+  Id          String    @id
+  DateCreate  DateTime  @default(now())
+  DateUpdate  DateTime? @updatedAt
+  CreatedBy   String?
+  UpdatedBy   String?
+  Title       String
+  Description String
+  UserCreated User?     @relation("userCreated", fields: [CreatedBy], references: [Id])
+  UserUpdated User?     @relation("userUpdated", fields: [UpdatedBy], references: [Id])
+}
+
 enum ActiveStatus {
   ACTIVE
   INACTIVE
@@ -48,7 +321,13 @@ enum ActiveStatus {
 enum RoleType {
   SUPERADMIN
   ADMIN
-  USER
+  EVENTADMIN
+  PARTICIPANT
+  FACILITATOR
 }
 
-// #endregion
+enum PaymentType {
+  PENDING
+  CONFIRMED
+  COMPLETED
+}

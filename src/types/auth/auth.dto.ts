@@ -1,6 +1,6 @@
 export class AuthDto {
-  email: string;
+  username: string;
   password: string;
-  firstName: string;
-  lastName?: string | null;
+  name: string;
+  email?: string | null;
 }

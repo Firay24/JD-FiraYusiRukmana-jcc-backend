@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 
 import { UtilityService } from 'src/services/utility.service';
 import { PrismaService } from 'src/services/prisma.service';
@@ -19,12 +19,12 @@ export class AuthController {
   @Post('sign-in')
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() body: AuthDto, @Res() res: Response) {
-    let { email, password } = body;
-    email = email.trim().toLowerCase();
+    let { username, password } = body;
+    username = username.trim().toLowerCase();
     password = password.trim();
 
     const user = await this.prismaService.user.findFirst({
-      where: { Email: email },
+      where: { Username: username },
       include: { Role: true },
     });
     if (!user)
@@ -42,7 +42,7 @@ export class AuthController {
 
     const token = this.jwtService.generateTokens({
       id: user.Id,
-      email,
+      username,
       role: {
         id: user.Role.Id,
         name: user.Role.Name,
@@ -64,66 +64,66 @@ export class AuthController {
     });
   }
 
-  @Post('sign-out')
-  async signOut(@Res() res: Response) {
-    this.jwtService.clearTokenCookie(res);
+  // @Post('sign-out')
+  // async signOut(@Res() res: Response) {
+  //   this.jwtService.clearTokenCookie(res);
 
-    return this.utilityService.globalResponse({
-      res,
-      statusCode: 200,
-      message: 'Sign out successfully',
-    });
-  }
+  //   return this.utilityService.globalResponse({
+  //     res,
+  //     statusCode: 200,
+  //     message: 'Sign out successfully',
+  //   });
+  // }
 
-  @Post('sign-up')
-  @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() body: AuthDto) {
-    let { email, password, firstName, lastName } = body;
-    email = email.trim().toLowerCase();
-    password = password.trim();
-    firstName = firstName.trim();
-    lastName = lastName.trim();
+  // @Post('sign-up')
+  // @HttpCode(HttpStatus.CREATED)
+  // async signUp(@Body() body: AuthDto) {
+  //   let { email, password, firstName, lastName } = body;
+  //   email = email.trim().toLowerCase();
+  //   password = password.trim();
+  //   firstName = firstName.trim();
+  //   lastName = lastName.trim();
 
-    if (!firstName)
-      return this.utilityService.globalResponse({
-        statusCode: 409,
-        message: 'First Name cannot empty',
-      });
+  //   if (!firstName)
+  //     return this.utilityService.globalResponse({
+  //       statusCode: 409,
+  //       message: 'First Name cannot empty',
+  //     });
 
-    const dbUser = await this.prismaService.user.findFirst({
-      where: { Email: email },
-    });
-    if (dbUser)
-      return this.utilityService.globalResponse({
-        statusCode: 409,
-        message: 'Email already exists',
-      });
+  //   const dbUser = await this.prismaService.user.findFirst({
+  //     where: { Email: email },
+  //   });
+  //   if (dbUser)
+  //     return this.utilityService.globalResponse({
+  //       statusCode: 409,
+  //       message: 'Email already exists',
+  //     });
 
-    const messagePassword = this.utilityService.validatePassword(password);
-    if (messagePassword)
-      return this.utilityService.globalResponse({
-        statusCode: 400,
-        message: messagePassword,
-      });
+  //   const messagePassword = this.utilityService.validatePassword(password);
+  //   if (messagePassword)
+  //     return this.utilityService.globalResponse({
+  //       statusCode: 400,
+  //       message: messagePassword,
+  //     });
 
-    const hashedPassword = this.utilityService.hashPassword(password);
+  //   const hashedPassword = this.utilityService.hashPassword(password);
 
-    await this.prismaService.user.create({
-      data: {
-        Id: this.utilityService.generateId(),
-        Email: email,
-        Password: hashedPassword,
-        FirstName: firstName,
-        LastName: lastName,
-        RoleId: '4',
-      },
-    });
+  //   await this.prismaService.user.create({
+  //     data: {
+  //       Id: this.utilityService.generateId(),
+  //       Email: email,
+  //       Password: hashedPassword,
+  //       FirstName: firstName,
+  //       LastName: lastName,
+  //       RoleId: '4',
+  //     },
+  //   });
 
-    return this.utilityService.globalResponse({
-      statusCode: 201,
-      message: 'User Created',
-    });
-  }
+  //   return this.utilityService.globalResponse({
+  //     statusCode: 201,
+  //     message: 'User Created',
+  //   });
+  // }
 
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {

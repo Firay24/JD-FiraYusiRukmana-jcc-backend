@@ -1,6 +1,6 @@
 export class PayloadDto {
   id: string;
-  email: string;
+  username: string;
   role: {
     id: string;
     name: string;
