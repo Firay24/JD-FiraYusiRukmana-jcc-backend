@@ -14,6 +14,11 @@ export class ProfileController {
     private utilityService: UtilityService,
   ) {}
 
+  @Get()
+  getApiWorked(): string {
+    return 'api worked';
+  }
+
   // @Get('detail')
   // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
   // async getProfile(@Req() request: Request) {
