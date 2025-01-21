@@ -56,6 +56,7 @@ export class AuthController {
       statusCode: 200,
       message: 'Sign in successfully',
       data: {
+        username: user.Username,
         role: {
           id: user.Role.Id,
           name: user.Role.Name,

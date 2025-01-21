@@ -49,6 +49,7 @@ export class JwtService {
     try {
       return this.jwtService.verify(token, { secret: this.accessSecret });
     } catch (error) {
+      console.log(error);
       throw this.utilityService.globalResponse({ message: 'Invalid Token', statusCode: 401 });
     }
   }
@@ -57,6 +58,7 @@ export class JwtService {
     try {
       return this.jwtService.verify(token, { secret: this.refreshSecret });
     } catch (error) {
+      console.log(error);
       throw this.utilityService.globalResponse({ message: 'Invalid Token', statusCode: 401 });
     }
   }
