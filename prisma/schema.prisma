@@ -30,9 +30,9 @@ model User {
   Gender          Boolean
   Email           String?           @unique
   Status          ActiveStatus      @default(ACTIVE)
-  Role            Role              @relation(fields: [RoleId], references: [Id])
-  Student         Student[]
   CompetitionRoom CompetitionRoom[]
+  Student         Student[]
+  Role            Role              @relation(fields: [RoleId], references: [Id])
 }
 
 model Student {
@@ -50,7 +50,7 @@ model Student {
   PhotoPath              String
   Birthdate              DateTime
   CompetitionParticipant CompetitionParticipant[]
-  User                   User                     @relation(fields: [IdUser], references: [Id], onDelete: Restrict)
+  User                   User                     @relation(fields: [IdUser], references: [Id])
 }
 
 model Season {
@@ -143,11 +143,11 @@ model CompetitionRoom {
   Name                   String
   CompetitionId          String
   SupervisorId           String
-  CompetitionParticipant CompetitionParticipant[]
-  Competition            Competition              @relation(fields: [CompetitionId], references: [Id], onDelete: Restrict)
-  Supervisor             Supervisor               @relation(fields: [SupervisorId], references: [Id], onDelete: Restrict)
-  User                   User?                    @relation(fields: [userId], references: [Id])
   userId                 String?
+  CompetitionParticipant CompetitionParticipant[]
+  Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
+  Supervisor             Supervisor               @relation(fields: [SupervisorId], references: [Id])
+  User                   User?                    @relation(fields: [userId], references: [Id])
 }
 
 model CompetitionParticipant {
@@ -164,8 +164,8 @@ model CompetitionParticipant {
   Score             Int
   Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
   CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
-  Student           Student          @relation(fields: [StudentId], references: [Id])
   Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
+  Student           Student          @relation(fields: [StudentId], references: [Id])
 }
 
 model Kisi {
