@@ -162,6 +162,7 @@ model CompetitionParticipant {
   PaymentId         String?
   Attedance         Boolean
   Score             Int
+  Poin              Int
   Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
   CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
   Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
