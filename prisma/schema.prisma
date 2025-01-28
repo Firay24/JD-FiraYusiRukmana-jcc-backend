@@ -16,49 +16,45 @@ model Role {
 }
 
 model User {
-  Id              String            @id
-  DateCreate      DateTime          @default(now())
-  DateUpdate      DateTime?         @updatedAt
-  CreatedBy       String?
-  UpdatedBy       String?
-  Name            String
-  Username        String
-  Password        String
-  RoleId          String
-  Birthdate       DateTime
-  PhoneNumber     String
-  Gender          Boolean
-  Email           String?           @unique
-  Status          ActiveStatus      @default(ACTIVE)
-  CompetitionRoom CompetitionRoom[]
-  Student         Student[]
-  Role            Role              @relation(fields: [RoleId], references: [Id])
+  Id          String       @id
+  DateCreate  DateTime     @default(now())
+  DateUpdate  DateTime?    @updatedAt
+  Name        String
+  Username    String
+  Password    String
+  RoleId      String
+  Birthdate   DateTime
+  PhoneNumber String
+  Gender      Boolean
+  Email       String?      @unique
+  Status      ActiveStatus @default(ACTIVE)
+  Student     Student[]
+  Role        Role         @relation(fields: [RoleId], references: [Id])
 }
 
 model Student {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
-  CreatedBy              String?
-  UpdatedBy              String?
   Address                String
+  Stage                  StageType
   Class                  String
+  SchoolId               String
   NIK                    String
   FatherName             String
   MotherName             String
   IdUser                 String
   PhotoPath              String
-  Birthdate              DateTime
   CompetitionParticipant CompetitionParticipant[]
   User                   User                     @relation(fields: [IdUser], references: [Id])
+  Subscription           Subscription[]
+  School                 School                   @relation(fields: [SchoolId], references: [Id])
 }
 
 model Season {
   Id          String        @id
   DateCreate  DateTime      @default(now())
   DateUpdate  DateTime?     @updatedAt
-  CreatedBy   String?
-  UpdatedBy   String?
   Name        String
   StartDate   DateTime
   EndDate     DateTime
@@ -69,8 +65,6 @@ model Subject {
   Id          String        @id
   DateCreate  DateTime      @default(now())
   DateUpdate  DateTime?     @updatedAt
-  CreatedBy   String?
-  UpdatedBy   String?
   Name        String
   Competition Competition[]
 }
@@ -79,45 +73,65 @@ model Competition {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
-  CreatedBy              String?
-  UpdatedBy              String?
   Name                   String
+  Description            String
   Date                   DateTime
   Level                  Int
   Stage                  String
   Price                  Int
+  Location               String
   SeasonId               String
   SubjectId              String
+  CodePackage            String?
+  PathAnswer             String?
   Season                 Season                   @relation(fields: [SeasonId], references: [Id])
   Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
   CompetitionParticipant CompetitionParticipant[]
   CompetitionRoom        CompetitionRoom[]
-  Discussion             Discussion[]
-  Exam                   Exam[]
   Kisi                   Kisi[]
   Tryout                 Tryout[]
+  Subscription           Subscription[]
 }
 
-model Exam {
-  Id            String      @id
-  DateCreate    DateTime    @default(now())
-  DateUpdate    DateTime?   @updatedAt
-  CreatedBy     String?
-  UpdatedBy     String?
-  CompetitionId String
-  Correct       Int
-  Incorrect     Int
-  Score         Int
-  QuestionCode  String
-  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+model Subscription {
+  Id            String       @id
+  DateCreate    DateTime     @default(now())
+  DateUpdate    DateTime?    @updatedAt
+  StartDate     DateTime
+  EndDate       DateTime
+  Status        Boolean      @default(true)
+  StudentId     String
+  CompetitionId String?
+  Student       Student      @relation(fields: [StudentId], references: [Id])
+  Competition   Competition? @relation(fields: [CompetitionId], references: [Id])
 }
+
+// model Discussion {
+//   Id            String      @id
+//   DateCreate    DateTime    @default(now())
+//   DateUpdate    DateTime?   @updatedAt
+//   Name          String
+//   CompetitionId String
+//   FilePath      String
+//   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+// }
+
+// model Exam {
+//   Id            String      @id
+//   DateCreate    DateTime    @default(now())
+//   DateUpdate    DateTime?   @updatedAt
+//   CompetitionId String
+//   Correct       Int
+//   Incorrect     Int
+//   Score         Int
+//   QuestionCode  String
+//   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+// }
 
 model Region {
   Id           String    @id
   DateCreate   DateTime  @default(now())
   DateUpdate   DateTime? @updatedAt
-  CreatedBy    String?
-  UpdatedBy    String?
   Name         String
   RegionDetail String
 }
@@ -126,8 +140,6 @@ model Supervisor {
   Id              String            @id
   DateCreate      DateTime          @default(now())
   DateUpdate      DateTime?         @updatedAt
-  CreatedBy       String?
-  UpdatedBy       String?
   Name            String
   Birthdate       DateTime
   PhoneNumber     String
@@ -138,31 +150,28 @@ model CompetitionRoom {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
-  CreatedBy              String?
-  UpdatedBy              String?
   Name                   String
   CompetitionId          String
   SupervisorId           String
-  userId                 String?
   CompetitionParticipant CompetitionParticipant[]
   Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
   Supervisor             Supervisor               @relation(fields: [SupervisorId], references: [Id])
-  User                   User?                    @relation(fields: [userId], references: [Id])
 }
 
 model CompetitionParticipant {
   Id                String           @id
   DateCreate        DateTime         @default(now())
   DateUpdate        DateTime?        @updatedAt
-  CreatedBy         String?
-  UpdatedBy         String?
   StudentId         String
   CompetitionId     String
   CompetitionRoomId String?
   PaymentId         String?
-  Attedance         Boolean
-  Score             Int
-  Poin              Int
+  Attedance         Boolean?
+  Score             Int?
+  Correct           Int?
+  Incorrect         Int?
+  PathAnswer        String?
+  Poin              Int?
   Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
   CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
   Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
@@ -173,8 +182,7 @@ model Kisi {
   Id            String      @id
   DateCreate    DateTime    @default(now())
   DateUpdate    DateTime?   @updatedAt
-  CreatedBy     String?
-  UpdatedBy     String?
+  Header        String?
   Content       String
   CompetitionId String
   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
@@ -184,8 +192,6 @@ model Tryout {
   Id            String      @id
   DateCreate    DateTime    @default(now())
   DateUpdate    DateTime?   @updatedAt
-  CreatedBy     String?
-  UpdatedBy     String?
   Name          String
   CompetitionId String
   Question      Question[]
@@ -196,8 +202,6 @@ model Question {
   Id         String    @id
   DateCreate DateTime  @default(now())
   DateUpdate DateTime? @updatedAt
-  CreatedBy  String?
-  UpdatedBy  String?
   TryoutId   String
   Content    String
   Option     Option[]
@@ -208,52 +212,56 @@ model Option {
   Id         String    @id
   DateCreate DateTime  @default(now())
   DateUpdate DateTime? @updatedAt
-  CreatedBy  String?
-  UpdatedBy  String?
   Answer     String
   IsCorrect  Boolean
   QuestionId String
   Question   Question  @relation(fields: [QuestionId], references: [Id])
 }
 
-model Discussion {
-  Id            String      @id
-  DateCreate    DateTime    @default(now())
-  DateUpdate    DateTime?   @updatedAt
-  CreatedBy     String?
-  UpdatedBy     String?
-  Name          String
-  CompetitionId String
-  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
-}
-
 model Payment {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
-  CreatedBy              String?
-  UpdatedBy              String?
   Invoice                String
   Date                   DateTime
   Amount                 Int
   Status                 PaymentType
-  UserId                 String
   CompetitionParticipant CompetitionParticipant[]
+}
+
+model School {
+  Id          String       @id
+  DateCreate  DateTime     @default(now())
+  DateUpdate  DateTime?    @updatedAt
+  Name        String
+  Subdistrict Subdistrict
+  Ward        String
+  Status      StatusSchool
+  Student     Student[]
 }
 
 model News {
   Id          String    @id
   DateCreate  DateTime  @default(now())
   DateUpdate  DateTime? @updatedAt
-  CreatedBy   String?
-  UpdatedBy   String?
   Title       String
   Description String
+}
+
+enum StageType {
+  TK
+  SD
+  SMP
 }
 
 enum ActiveStatus {
   ACTIVE
   INACTIVE
+}
+
+enum StatusSchool {
+  SWASTA
+  NEGERI
 }
 
 enum RoleType {
@@ -268,4 +276,32 @@ enum PaymentType {
   PENDING
   CONFIRMED
   COMPLETED
+}
+
+enum Subdistrict {
+  PESANGGARAN
+  SILIRAGUNG
+  BANGOREJO
+  PURWOHARJO
+  TEGALDLIMO
+  MUNCAAR
+  CLURING
+  GAMBIRAN
+  TEGALSARI
+  GLENMORE
+  KALIBARU
+  GENTENG
+  SRONO
+  ROGOJAMPI
+  BLIMBINGSARI
+  KABAT
+  SINGOJURUH
+  SEMPU
+  SONGGON
+  GLAGAH
+  LICIN
+  BANYUWANGI
+  GIRI
+  KALIPURO
+  WONGSOREJO
 }
