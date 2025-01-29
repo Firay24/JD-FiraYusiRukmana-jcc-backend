@@ -84,7 +84,7 @@ export class AuthController {
     username = username.toLowerCase().trim();
     name = name.trim();
     email = email ?? email.trim();
-    password = password.trim();
+    password = password ? password.trim() : this.utilityService.generateRandomPassword();
     roleId = roleId.trim();
     birthdate = birthdate.trim();
     phoneNumber = phoneNumber.trim();

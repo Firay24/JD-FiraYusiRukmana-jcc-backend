@@ -45,7 +45,7 @@ model Student {
   FatherName             String
   MotherName             String
   IdUser                 String
-  PhotoPath              String
+  PhotoPath              String?
   Poin                   Int                      @default(0)
   CompetitionParticipant CompetitionParticipant[]
   User                   User                     @relation(fields: [IdUser], references: [Id])
@@ -248,6 +248,7 @@ model School {
   DateCreate  DateTime     @default(now())
   DateUpdate  DateTime?    @updatedAt
   Name        String
+  Stage       StageType
   Subdistrict Subdistrict
   Ward        String
   Status      StatusSchool

@@ -15,51 +15,51 @@ export class ExampleController {
     private utilityService: UtilityService,
   ) {}
 
-  @Get('list')
-  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
-  async listExample(@Req() request: Request, @Query('search') search: string, @Query('page') page: number, @Query('totalPage') totalPage: number) {
-    const user = request.user;
+  // @Get('list')
+  // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
+  // async listExample(@Req() request: Request, @Query('search') search: string, @Query('page') page: number, @Query('totalPage') totalPage: number) {
+  //   const user = request.user;
 
-    return this.utilityService.globalResponse<{ user: any; list: ExampleListDto[]; total: number; query: { search: string; page: number; totalPage: number } }>({
-      data: { user: user, list: [], total: 0, query: { search, page, totalPage } },
-      message: 'Success',
-      statusCode: 200,
-    });
-  }
+  //   return this.utilityService.globalResponse<{ user: any; list: ExampleListDto[]; total: number; query: { search: string; page: number; totalPage: number } }>({
+  //     data: { user: user, list: [], total: 0, query: { search, page, totalPage } },
+  //     message: 'Success',
+  //     statusCode: 200,
+  //   });
+  // }
 
-  @Get('detail/:id')
-  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
-  async detailExample(@Req() request: Request, @Param('id') id: string) {
-    const user = request.user;
+  // @Get('detail/:id')
+  // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
+  // async detailExample(@Req() request: Request, @Param('id') id: string) {
+  //   const user = request.user;
 
-    return this.utilityService.globalResponse<{ user: any; id: string }>({
-      data: { user: user, id },
-      message: 'Success',
-      statusCode: 200,
-    });
-  }
+  //   return this.utilityService.globalResponse<{ user: any; id: string }>({
+  //     data: { user: user, id },
+  //     message: 'Success',
+  //     statusCode: 200,
+  //   });
+  // }
 
-  @Post('save')
-  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
-  async saveExample(@Req() request: Request, @Body() body: ExampleCreateDto) {
-    const user = request.user;
+  // @Post('save')
+  // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
+  // async saveExample(@Req() request: Request, @Body() body: ExampleCreateDto) {
+  //   const user = request.user;
 
-    return this.utilityService.globalResponse<{ user: any; body: ExampleCreateDto }>({
-      data: { user, body },
-      message: 'Success',
-      statusCode: 200,
-    });
-  }
+  //   return this.utilityService.globalResponse<{ user: any; body: ExampleCreateDto }>({
+  //     data: { user, body },
+  //     message: 'Success',
+  //     statusCode: 200,
+  //   });
+  // }
 
-  @Post('delete')
-  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
-  async deleteExample(@Req() request: Request, @Body() body: string[]) {
-    const user = request.user;
+  // @Post('delete')
+  // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
+  // async deleteExample(@Req() request: Request, @Body() body: string[]) {
+  //   const user = request.user;
 
-    return this.utilityService.globalResponse<{ user: any; body: string[] }>({
-      data: { user, body },
-      message: 'Success',
-      statusCode: 200,
-    });
-  }
+  //   return this.utilityService.globalResponse<{ user: any; body: string[] }>({
+  //     data: { user, body },
+  //     message: 'Success',
+  //     statusCode: 200,
+  //   });
+  // }
 }

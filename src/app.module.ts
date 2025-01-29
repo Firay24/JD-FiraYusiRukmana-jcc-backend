@@ -8,6 +8,7 @@ import { SharedModule } from './shared.module';
 import { PublicModule } from './controller/public/public.module';
 import { AdminModule } from './controller/admin/admin.module';
 import { UserModule } from './controller/user/user.module';
+import { StudentModule } from './controller/student/student.module';
 
 @Module({
   imports: [
@@ -30,6 +31,10 @@ import { UserModule } from './controller/user/user.module';
         module: UserModule,
       },
       {
+        path: 'v1/student',
+        module: StudentModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -46,6 +51,7 @@ import { UserModule } from './controller/user/user.module';
     PublicModule,
     AdminModule,
     UserModule,
+    StudentModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { PrismaClient, RoleType } from '@prisma/client';
+import { PrismaClient, RoleType, StageType, StatusSchool, Subdistrict } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -34,82 +34,108 @@ const generateUuid = () => {
 
 async function main() {
   // #region Role
-  const roles = [
-    { Id: generateUuid(), Name: RoleType.SUPERADMIN },
-    { Id: generateUuid(), Name: RoleType.ADMIN },
-    { Id: generateUuid(), Name: RoleType.EVENTADMIN },
-    { Id: generateUuid(), Name: RoleType.FACILITATOR },
-    { Id: generateUuid(), Name: RoleType.PARTICIPANT },
-  ];
-  await prisma.role.createMany({
-    skipDuplicates: true,
-    data: roles,
-  });
+  // const roles = [
+  //   { Id: generateUuid(), Name: RoleType.SUPERADMIN },
+  //   { Id: generateUuid(), Name: RoleType.ADMIN },
+  //   { Id: generateUuid(), Name: RoleType.EVENTADMIN },
+  //   { Id: generateUuid(), Name: RoleType.FACILITATOR },
+  //   { Id: generateUuid(), Name: RoleType.PARTICIPANT },
+  // ];
+  // await prisma.role.createMany({
+  //   skipDuplicates: true,
+  //   data: roles,
+  // });
   // #endregion
 
   // #region User
-  await prisma.user.createMany({
+  // await prisma.user.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       Name: 'Superadmin',
+  //       Username: 'superadmin',
+  //       Email: 'superadmin@mail.com',
+  //       Password: hashPassword('junior12345'),
+  //       RoleId: roles.find((a) => a.Name === RoleType.SUPERADMIN)?.Id,
+  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       PhoneNumber: '08123456789',
+  //       Gender: true,
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       Name: 'Admin',
+  //       Username: 'admin',
+  //       Email: 'admin@mail.com',
+  //       Password: hashPassword('junior12345'),
+  //       RoleId: roles.find((a) => a.Name === RoleType.ADMIN)?.Id,
+  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       PhoneNumber: '08123456789',
+  //       Gender: false,
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       Name: 'Eventadmin',
+  //       Username: 'eventadmin',
+  //       Email: 'eventadmin@mail.com',
+  //       Password: hashPassword('junior12345'),
+  //       RoleId: roles.find((a) => a.Name === RoleType.EVENTADMIN)?.Id,
+  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       PhoneNumber: '08123456789',
+  //       Gender: false,
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       Name: 'Facilitator',
+  //       Username: 'facilitator',
+  //       Email: 'facilitator@mail.com',
+  //       Password: hashPassword('junior12345'),
+  //       RoleId: roles.find((a) => a.Name === RoleType.FACILITATOR)?.Id,
+  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       PhoneNumber: '08123456789',
+  //       Gender: false,
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       Name: 'Participant',
+  //       Username: 'participant',
+  //       Email: 'participant@mail.com',
+  //       Password: hashPassword('junior12345'),
+  //       RoleId: roles.find((a) => a.Name === RoleType.PARTICIPANT)?.Id,
+  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       PhoneNumber: '08123456789',
+  //       Gender: false,
+  //     },
+  //   ],
+  // });
+  // #endregion
+
+  // #region School
+  await prisma.school.createMany({
     skipDuplicates: true,
     data: [
       {
         Id: generateUuid(),
-        Name: 'Superadmin',
-        Username: 'superadmin',
-        Email: 'superadmin@mail.com',
-        Password: hashPassword('junior12345'),
-        RoleId: roles.find((a) => a.Name === RoleType.SUPERADMIN)?.Id,
-        Birthdate: new Date('2001-01-19T00:00:00Z'),
-        PhoneNumber: '08123456789',
-        Gender: true,
+        DateCreate: new Date(),
+        DateUpdate: new Date(),
+        Name: 'SD NEGERI 1 KANDANGAN',
+        Subdistrict: 'PESANGGARAN' as Subdistrict,
+        Ward: 'KANDANGAN',
+        Status: 'NEGERI' as StatusSchool,
+        Stage: 'SD' as StageType,
       },
       {
         Id: generateUuid(),
-        Name: 'Admin',
-        Username: 'admin',
-        Email: 'admin@mail.com',
-        Password: hashPassword('junior12345'),
-        RoleId: roles.find((a) => a.Name === RoleType.ADMIN)?.Id,
-        Birthdate: new Date('2001-01-19T00:00:00Z'),
-        PhoneNumber: '08123456789',
-        Gender: false,
-      },
-      {
-        Id: generateUuid(),
-        Name: 'Eventadmin',
-        Username: 'eventadmin',
-        Email: 'eventadmin@mail.com',
-        Password: hashPassword('junior12345'),
-        RoleId: roles.find((a) => a.Name === RoleType.EVENTADMIN)?.Id,
-        Birthdate: new Date('2001-01-19T00:00:00Z'),
-        PhoneNumber: '08123456789',
-        Gender: false,
-      },
-      {
-        Id: generateUuid(),
-        Name: 'Facilitator',
-        Username: 'facilitator',
-        Email: 'facilitator@mail.com',
-        Password: hashPassword('junior12345'),
-        RoleId: roles.find((a) => a.Name === RoleType.FACILITATOR)?.Id,
-        Birthdate: new Date('2001-01-19T00:00:00Z'),
-        PhoneNumber: '08123456789',
-        Gender: false,
-      },
-      {
-        Id: generateUuid(),
-        Name: 'Participant',
-        Username: 'participant',
-        Email: 'participant@mail.com',
-        Password: hashPassword('junior12345'),
-        RoleId: roles.find((a) => a.Name === RoleType.PARTICIPANT)?.Id,
-        Birthdate: new Date('2001-01-19T00:00:00Z'),
-        PhoneNumber: '08123456789',
-        Gender: false,
+        DateCreate: new Date(),
+        DateUpdate: new Date(),
+        Name: 'SMP NEGERI 1 CLURING',
+        Subdistrict: 'CLURING' as Subdistrict,
+        Ward: 'CLURING',
+        Status: 'NEGERI' as StatusSchool,
+        Stage: 'SMP' as StageType,
       },
     ],
   });
-
-  console.log('Success seeding data!');
 }
 main()
   .then(async () => {
