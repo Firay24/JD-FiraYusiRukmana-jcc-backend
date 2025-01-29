@@ -1,10 +1,10 @@
-import { PrismaClient, RoleType, StageType, StatusSchool, Subdistrict } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import * as bcryptjs from 'bcryptjs';
+// import * as bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
@@ -20,11 +20,11 @@ dayjs.extend(utc);
 
 //   return `${dayjs().unix()}${result}`;
 // }
-function hashPassword(password: string): string {
-  const salt = bcryptjs.genSaltSync(10);
-  const hash = bcryptjs.hashSync(password, salt);
-  return hash;
-}
+// function hashPassword(password: string): string {
+//   const salt = bcryptjs.genSaltSync(10);
+//   const hash = bcryptjs.hashSync(password, salt);
+//   return hash;
+// }
 
 const generateUuid = () => {
   const uuid = uuidv4();
