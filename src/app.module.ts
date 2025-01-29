@@ -7,8 +7,8 @@ import { GlobalModule } from './controller/global/global.module';
 import { SharedModule } from './shared.module';
 import { PublicModule } from './controller/public/public.module';
 import { AdminModule } from './controller/admin/admin.module';
-import { UserModule } from './controller/user/user.module';
 import { StudentModule } from './controller/student/student.module';
+import { UserModule } from './controller/user/user.module';
 
 @Module({
   imports: [
@@ -27,12 +27,12 @@ import { StudentModule } from './controller/student/student.module';
         module: AdminModule,
       },
       {
-        path: 'v1/user',
-        module: UserModule,
-      },
-      {
         path: 'v1/student',
         module: StudentModule,
+      },
+      {
+        path: 'v1/user',
+        module: UserModule,
       },
       {
         path: 'v1/public',
@@ -50,8 +50,8 @@ import { StudentModule } from './controller/student/student.module';
     GlobalModule,
     PublicModule,
     AdminModule,
-    UserModule,
     StudentModule,
+    UserModule,
   ],
 })
 export class AppModule {}
