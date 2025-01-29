@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -6,10 +6,29 @@ import { PrismaService } from 'src/services/prisma.service';
 import { UtilityService } from 'src/services/utility.service';
 import { CompetitionSaveDto } from 'src/types/controller/competition/competition.dto';
 import { Request } from 'express';
-// import * as fs from 'fs';
-// import * as path from 'path';
-// import { diskStorage } from 'multer';
-// import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import * as xlsx from 'xlsx';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { StageType } from '@prisma/client';
+
+interface ExcelRow {
+  name: string;
+  username: string;
+  password: string;
+  gender: string;
+  phoneNumber: string;
+  address: string;
+  stage: string;
+  class: string;
+  nik: string;
+  fatherName: string;
+  motherName: string;
+  level: string;
+  subject: string;
+  birthdate: string;
+}
 
 @Controller()
 @UseGuards(RolesGuard)
@@ -116,33 +135,145 @@ export class ActivityController {
   // #endregion
 
   // #region batch save
-  // @Post('batch-save')
-  // @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR])
-  // @UseInterceptors(
-  //   FileInterceptor('file', {
-  //     storage: diskStorage({
-  //       destination: './uploads',
-  //       filename: (req, file, cb) => {
-  //         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  //         cb(null, uniqueSuffix + path.extname(file.originalname));
-  //       },
-  //     }),
-  //     fileFilter: (req, file, cb) => {
-  //       if (!file.originalname.match(/\.(xlsx|xls)$/)) {
-  //         return cb(new BadRequestException('Only Excel files are allowed'), false);
-  //       }
-  //       cb(null, true);
-  //     },
-  //   }),
-  // )
-  // async uploadFile(@UploadedFile() file: Express.Multer.File, @Body('schoolId') schoolId: string, @Body('competitionId') competitionId: string) {
-  //   if (!file) {
-  //     throw new BadRequestException('No file uploaded');
-  //   }
+  @Post('batch-save')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR])
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + path.extname(file.originalname));
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(xlsx|xls)$/)) {
+          return cb(new BadRequestException('Only Excel files are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Body('schoolId') schoolId: string) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
 
-  //   return {
-  //     message: 'Upload sukses',
-  //   };
-  // }
+    const filePath = path.join(process.cwd(), 'uploads', file.filename);
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data: ExcelRow[] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Hapus file setelah diproses
+    fs.unlinkSync(filePath);
+
+    // const users = [];
+    // const students = [];
+    // const participants = [];
+
+    let totalAmount = 0;
+    const payment = await this.prismaService.payment.create({
+      data: {
+        Id: this.utilityService.generateUuid(),
+        Invoice: this.utilityService.generateInvoice(),
+        Date: new Date(),
+        Amount: 0,
+        Status: 'PENDING',
+      },
+    });
+
+    for (const row of data) {
+      const dbUser = await this.prismaService.user.findFirst({
+        where: { Username: row.username },
+      });
+      if (dbUser)
+        return this.utilityService.globalResponse({
+          statusCode: 409,
+          message: 'Username already exists',
+        });
+
+      const messagePassword = this.utilityService.validatePassword(row.password);
+      if (messagePassword)
+        return this.utilityService.globalResponse({
+          statusCode: 400,
+          message: messagePassword,
+        });
+
+      const hashedPassword = this.utilityService.hashPassword(row.password);
+
+      const user = await this.prismaService.user.create({
+        data: {
+          Id: this.utilityService.generateId(),
+          Name: row.name,
+          Username: row.username,
+          Password: hashedPassword,
+          RoleId: '67cb3b008ca0499c84fc',
+          Birthdate: new Date(row.birthdate),
+          Gender: row.gender === 'Perempuan' ? false : true,
+          PhoneNumber: row.phoneNumber,
+        },
+      });
+
+      const subject = await this.prismaService.subject.findFirst({
+        where: { Name: row.subject },
+      });
+
+      const dbEvent = await this.prismaService.competition.findFirst({
+        where: { Stage: row.stage as StageType, Level: parseInt(row.level, 10), SubjectId: subject.Id },
+      });
+
+      if (!dbEvent) {
+        return this.utilityService.globalResponse({
+          statusCode: 404,
+          message: `Competition not found for subject: ${row.subject}, stage: ${row.stage}, level: ${row.level}`,
+        });
+      }
+
+      totalAmount += dbEvent.Price;
+
+      const student = await this.prismaService.student.create({
+        data: {
+          Id: this.utilityService.generateId(),
+          Address: row.address,
+          Stage: row.stage as StageType,
+          Class: row.class.toString(),
+          SchoolId: schoolId,
+          NIK: row.nik,
+          FatherName: row.fatherName,
+          MotherName: row.motherName,
+          IdUser: user.Id,
+        },
+      });
+
+      await this.prismaService.competitionParticipant.create({
+        data: {
+          Id: this.utilityService.generateId(),
+          StudentId: student.Id,
+          CompetitionId: dbEvent.Id,
+          PaymentId: payment.Id,
+          Attedance: false,
+          Score: 0,
+          Correct: 0,
+          Incorrect: 0,
+          PathAnswer: '',
+        },
+      });
+    }
+
+    await this.prismaService.payment.update({
+      where: { Id: payment.Id },
+      data: {
+        Amount: totalAmount,
+      },
+    });
+
+    return {
+      message: 'Upload sukses',
+      data: {
+        totalParticipant: data.length,
+        amount: totalAmount,
+      },
+    };
+  }
   // #endregion
 }
