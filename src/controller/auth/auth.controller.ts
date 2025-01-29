@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 
 import { UtilityService } from 'src/services/utility.service';
 import { PrismaService } from 'src/services/prisma.service';
@@ -56,6 +56,7 @@ export class AuthController {
       statusCode: 200,
       message: 'Sign in successfully',
       data: {
+        id: user.Id,
         username: user.Username,
         role: {
           id: user.Role.Id,
@@ -65,66 +66,141 @@ export class AuthController {
     });
   }
 
-  // @Post('sign-out')
-  // async signOut(@Res() res: Response) {
-  //   this.jwtService.clearTokenCookie(res);
+  @Post('sign-out')
+  async signOut(@Res() res: Response) {
+    this.jwtService.clearTokenCookie(res);
 
-  //   return this.utilityService.globalResponse({
-  //     res,
-  //     statusCode: 200,
-  //     message: 'Sign out successfully',
-  //   });
-  // }
+    return this.utilityService.globalResponse({
+      res,
+      statusCode: 200,
+      message: 'Sign out successfully',
+    });
+  }
 
-  // @Post('sign-up')
-  // @HttpCode(HttpStatus.CREATED)
-  // async signUp(@Body() body: AuthDto) {
-  //   let { email, password, firstName, lastName } = body;
-  //   email = email.trim().toLowerCase();
-  //   password = password.trim();
-  //   firstName = firstName.trim();
-  //   lastName = lastName.trim();
+  @Post('sign-up')
+  @HttpCode(HttpStatus.CREATED)
+  async signUp(@Body() body: AuthDto) {
+    let { username, password, email, name, roleId, birthdate, gender, phoneNumber } = body;
+    username = username.toLowerCase().trim();
+    name = name.trim();
+    email = email ?? email.trim();
+    password = password.trim();
+    roleId = roleId.trim();
+    birthdate = birthdate.trim();
+    phoneNumber = phoneNumber.trim();
+    gender = gender;
 
-  //   if (!firstName)
-  //     return this.utilityService.globalResponse({
-  //       statusCode: 409,
-  //       message: 'First Name cannot empty',
-  //     });
+    if (!name)
+      return this.utilityService.globalResponse({
+        statusCode: 409,
+        message: 'First Name cannot empty',
+      });
 
-  //   const dbUser = await this.prismaService.user.findFirst({
-  //     where: { Email: email },
-  //   });
-  //   if (dbUser)
-  //     return this.utilityService.globalResponse({
-  //       statusCode: 409,
-  //       message: 'Email already exists',
-  //     });
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Username: username },
+    });
+    if (dbUser)
+      return this.utilityService.globalResponse({
+        statusCode: 409,
+        message: 'Username already exists',
+      });
 
-  //   const messagePassword = this.utilityService.validatePassword(password);
-  //   if (messagePassword)
-  //     return this.utilityService.globalResponse({
-  //       statusCode: 400,
-  //       message: messagePassword,
-  //     });
+    const messagePassword = this.utilityService.validatePassword(password);
+    if (messagePassword)
+      return this.utilityService.globalResponse({
+        statusCode: 400,
+        message: messagePassword,
+      });
 
-  //   const hashedPassword = this.utilityService.hashPassword(password);
+    const hashedPassword = this.utilityService.hashPassword(password);
 
-  //   await this.prismaService.user.create({
-  //     data: {
-  //       Id: this.utilityService.generateId(),
-  //       Email: email,
-  //       Password: hashedPassword,
-  //       FirstName: firstName,
-  //       LastName: lastName,
-  //       RoleId: '4',
-  //     },
-  //   });
+    await this.prismaService.user.create({
+      data: {
+        Id: this.utilityService.generateId(),
+        Name: name,
+        Username: username,
+        Email: email,
+        Password: hashedPassword,
+        RoleId: roleId,
+        Birthdate: new Date(birthdate),
+        Gender: gender,
+        PhoneNumber: phoneNumber,
+      },
+    });
 
-  //   return this.utilityService.globalResponse({
-  //     statusCode: 201,
-  //     message: 'User Created',
-  //   });
-  // }
+    return this.utilityService.globalResponse({
+      statusCode: 201,
+      message: 'User Created',
+    });
+  }
+
+  @Get('logged')
+  async logged(@Req() req: Request, @Res() res: Response) {
+    // Ambil token dari cookie
+    const jwtCookie = req.cookies?.jwt;
+
+    // Jika tidak ada token, kembalikan respons error
+    if (!jwtCookie) {
+      return this.utilityService.globalResponse({
+        res,
+        statusCode: 401,
+        message: 'Not authenticated',
+      });
+    }
+
+    try {
+      // Parse cookie JSON jika diperlukan
+      const { accessToken } = typeof jwtCookie === 'string' ? JSON.parse(jwtCookie) : jwtCookie;
+
+      // Verifikasi token
+      const decoded = this.jwtService.verifyAccessToken(accessToken);
+
+      // Jika token tidak valid
+      if (!decoded) {
+        return this.utilityService.globalResponse({
+          res,
+          statusCode: 401,
+          message: 'Invalid token',
+        });
+      }
+
+      // Ambil pengguna berdasarkan ID dari token yang telah didekode
+      const user = await this.prismaService.user.findFirst({
+        where: { Id: decoded.id },
+        include: { Role: true },
+      });
+
+      // Jika pengguna tidak ditemukan
+      if (!user) {
+        return this.utilityService.globalResponse({
+          res,
+          statusCode: 404,
+          message: 'User not found',
+        });
+      }
+
+      // Kembalikan data pengguna yang telah diautentikasi
+      return this.utilityService.globalResponse({
+        res,
+        statusCode: 200,
+        message: 'User authenticated',
+        data: {
+          id: user.Id,
+          username: user.Username,
+          email: user.Email,
+          role: user.Role.Name,
+          name: user.Name,
+        },
+      });
+    } catch (error) {
+      // Jika terjadi error selama proses, kembalikan respons error
+      return this.utilityService.globalResponse({
+        res,
+        statusCode: 401,
+        message: `Failed to authenticate user ${error.message}`,
+      });
+    }
+  }
 
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
