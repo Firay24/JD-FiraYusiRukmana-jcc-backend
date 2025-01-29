@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { Roles } from 'src/guard/roles/roles.decorator';
@@ -76,4 +76,52 @@ export class StudentController {
       data: { id: student.Id },
     });
   }
+  //#endregion
+
+  //#region profile
+  @Get('profile')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async profile(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbStudent = await this.prismaService.student.findFirst({
+      where: { IdUser: user.id },
+      include: { School: true, User: true },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        name: dbStudent.User.Name,
+        username: dbStudent.User.Username,
+        gender: dbStudent.User.Gender,
+        birthdate: dbStudent.User.Birthdate,
+        phoneNumber: dbStudent.User.PhoneNumber,
+        address: dbStudent.Address,
+        school: dbStudent.School.Name,
+        stage: dbStudent.Stage,
+        class: dbStudent.Class,
+        nik: dbStudent.NIK,
+        fatherName: dbStudent.FatherName,
+        motherName: dbStudent.MotherName,
+        photoPath: dbStudent.PhotoPath,
+        poin: dbStudent.Poin,
+      },
+    });
+  }
+  //#endregion
 }
