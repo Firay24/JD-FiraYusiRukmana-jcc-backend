@@ -11,6 +11,7 @@ import { StudentModule } from './controller/student/student.module';
 import { UserModule } from './controller/user/user.module';
 import { EventModule } from './controller/event/event.module';
 import { ActivityModule } from './controller/activity/activity.module';
+import { PaymentModule } from './controller/payment/payment.module';
 
 @Module({
   imports: [
@@ -45,6 +46,10 @@ import { ActivityModule } from './controller/activity/activity.module';
         module: ActivityModule,
       },
       {
+        path: 'v1/payment',
+        module: PaymentModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -64,6 +69,7 @@ import { ActivityModule } from './controller/activity/activity.module';
     UserModule,
     EventModule,
     ActivityModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -71,7 +71,7 @@ export class EventController {
   // #region detail
   @Get('detail/:id')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])
-  async detail(@Req() request: Request, @Query('id') id: string) {
+  async detail(@Req() request: Request, @Param('id') id: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -105,6 +105,7 @@ export class EventController {
       statusCode: 200,
       message: 'Success',
       data: {
+        id: dbEvent.Id,
         name: dbEvent.Name,
         description: dbEvent.Description,
         date: dbEvent.Date,
