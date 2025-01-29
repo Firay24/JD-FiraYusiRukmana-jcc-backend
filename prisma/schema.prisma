@@ -16,9 +16,9 @@ model Role {
 }
 
 model User {
-  Id          String       @id
-  DateCreate  DateTime     @default(now())
-  DateUpdate  DateTime?    @updatedAt
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
   Name        String
   Username    String
   Password    String
@@ -26,10 +26,11 @@ model User {
   Birthdate   DateTime
   PhoneNumber String
   Gender      Boolean
-  Email       String?      @unique
-  Status      ActiveStatus @default(ACTIVE)
+  Email       String?       @unique
+  Status      ActiveStatus  @default(ACTIVE)
   Student     Student[]
-  Role        Role         @relation(fields: [RoleId], references: [Id])
+  Role        Role          @relation(fields: [RoleId], references: [Id])
+  Achievement Achievement[]
 }
 
 model Student {
@@ -44,11 +45,24 @@ model Student {
   FatherName             String
   MotherName             String
   IdUser                 String
-  PhotoPath              String
+  PhotoPath              String?
+  Poin                   Int                      @default(0)
   CompetitionParticipant CompetitionParticipant[]
   User                   User                     @relation(fields: [IdUser], references: [Id])
   Subscription           Subscription[]
   School                 School                   @relation(fields: [SchoolId], references: [Id])
+}
+
+model Achievement {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  UserId        String
+  Category      String
+  Describe      String?
+  CompetitionId String
+  User          User        @relation(fields: [UserId], references: [Id])
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
 }
 
 model Season {
@@ -77,7 +91,7 @@ model Competition {
   Description            String
   Date                   DateTime
   Level                  Int
-  Stage                  String
+  Stage                  StageType
   Price                  Int
   Location               String
   SeasonId               String
@@ -91,6 +105,7 @@ model Competition {
   Kisi                   Kisi[]
   Tryout                 Tryout[]
   Subscription           Subscription[]
+  Achievement            Achievement[]
 }
 
 model Subscription {
@@ -171,7 +186,6 @@ model CompetitionParticipant {
   Correct           Int?
   Incorrect         Int?
   PathAnswer        String?
-  Poin              Int?
   Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
   CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
   Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
@@ -234,6 +248,7 @@ model School {
   DateCreate  DateTime     @default(now())
   DateUpdate  DateTime?    @updatedAt
   Name        String
+  Stage       StageType
   Subdistrict Subdistrict
   Ward        String
   Status      StatusSchool
