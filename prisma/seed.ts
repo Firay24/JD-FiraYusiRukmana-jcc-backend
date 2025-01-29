@@ -138,48 +138,70 @@ async function main() {
   //
 
   // #region Season
-  await prisma.season.createMany({
-    skipDuplicates: true,
-    data: [
-      {
-        Id: generateUuid(),
-        DateCreate: new Date(),
-        DateUpdate: new Date(),
-        Name: '1',
-        StartDate: new Date('2025-02-23T00:00:00Z'),
-        EndDate: new Date('2025-05-01T00:00:00Z'),
-      },
-    ],
-  });
+  // await prisma.season.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: '1',
+  //       StartDate: new Date('2025-02-23T00:00:00Z'),
+  //       EndDate: new Date('2025-05-01T00:00:00Z'),
+  //     },
+  //   ],
+  // });
   // #endregion
 
   // #region Subject
-  await prisma.subject.createMany({
+  // await prisma.subject.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'matematika',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'ipa',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'bahasa inggris',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'ips',
+  //     },
+  //   ],
+  // });
+  // #endregion
+
+  // #region Kisi
+  await prisma.kisi.createMany({
     skipDuplicates: true,
     data: [
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
-        Name: 'matematika',
+        Content: 'Bilangan bulat',
+        CompetitionId: '6c1af2293ad8456eb31f',
       },
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
-        Name: 'ipa',
-      },
-      {
-        Id: generateUuid(),
-        DateCreate: new Date(),
-        DateUpdate: new Date(),
-        Name: 'bahasa inggris',
-      },
-      {
-        Id: generateUuid(),
-        DateCreate: new Date(),
-        DateUpdate: new Date(),
-        Name: 'ips',
+        Content: 'Bilangan pecahan',
+        CompetitionId: '6c1af2293ad8456eb31f',
       },
     ],
   });
