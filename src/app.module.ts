@@ -10,6 +10,7 @@ import { AdminModule } from './controller/admin/admin.module';
 import { StudentModule } from './controller/student/student.module';
 import { UserModule } from './controller/user/user.module';
 import { EventModule } from './controller/event/event.module';
+import { ActivityModule } from './controller/activity/activity.module';
 
 @Module({
   imports: [
@@ -40,6 +41,10 @@ import { EventModule } from './controller/event/event.module';
         module: EventModule,
       },
       {
+        path: 'v1/activity',
+        module: ActivityModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -58,6 +63,7 @@ import { EventModule } from './controller/event/event.module';
     StudentModule,
     UserModule,
     EventModule,
+    ActivityModule,
   ],
 })
 export class AppModule {}
