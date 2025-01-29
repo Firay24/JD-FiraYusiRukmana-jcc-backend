@@ -7,6 +7,7 @@ import * as sharp from 'sharp';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UtilityService {
@@ -51,6 +52,16 @@ export class UtilityService {
     return invoiceNumber;
   }
 
+  public generateRandomPassword(length: number = 8) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      password += characters[randomIndex];
+    }
+    return password;
+  }
+
   public generateId() {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -73,6 +84,12 @@ export class UtilityService {
     }
 
     return result;
+  }
+
+  public generateUuid() {
+    const uuid = uuidv4();
+    const noDashes = uuid.replace(/-/g, '');
+    return noDashes.slice(0, 20);
   }
 
   public validatePassword(password: string): string | null {

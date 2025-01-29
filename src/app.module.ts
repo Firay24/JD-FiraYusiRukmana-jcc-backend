@@ -7,7 +7,11 @@ import { GlobalModule } from './controller/global/global.module';
 import { SharedModule } from './shared.module';
 import { PublicModule } from './controller/public/public.module';
 import { AdminModule } from './controller/admin/admin.module';
+import { StudentModule } from './controller/student/student.module';
 import { UserModule } from './controller/user/user.module';
+import { EventModule } from './controller/event/event.module';
+import { ActivityModule } from './controller/activity/activity.module';
+import { PaymentModule } from './controller/payment/payment.module';
 
 @Module({
   imports: [
@@ -26,8 +30,24 @@ import { UserModule } from './controller/user/user.module';
         module: AdminModule,
       },
       {
+        path: 'v1/student',
+        module: StudentModule,
+      },
+      {
         path: 'v1/user',
         module: UserModule,
+      },
+      {
+        path: 'v1/event',
+        module: EventModule,
+      },
+      {
+        path: 'v1/activity',
+        module: ActivityModule,
+      },
+      {
+        path: 'v1/payment',
+        module: PaymentModule,
       },
       {
         path: 'v1/public',
@@ -45,7 +65,11 @@ import { UserModule } from './controller/user/user.module';
     GlobalModule,
     PublicModule,
     AdminModule,
+    StudentModule,
     UserModule,
+    EventModule,
+    ActivityModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}
