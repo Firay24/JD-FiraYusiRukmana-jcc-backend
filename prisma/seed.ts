@@ -46,7 +46,6 @@ async function main() {
   //   data: roles,
   // });
   // #endregion
-
   // #region User
   // await prisma.user.createMany({
   //   skipDuplicates: true,
@@ -109,33 +108,82 @@ async function main() {
   //   ],
   // });
   // #endregion
-
   // #region School
-  await prisma.school.createMany({
+  // await prisma.school.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'SD NEGERI 1 KANDANGAN',
+  //       Subdistrict: 'PESANGGARAN' as Subdistrict,
+  //       Ward: 'KANDANGAN',
+  //       Status: 'NEGERI' as StatusSchool,
+  //       Stage: 'SD' as StageType,
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Name: 'SMP NEGERI 1 CLURING',
+  //       Subdistrict: 'CLURING' as Subdistrict,
+  //       Ward: 'CLURING',
+  //       Status: 'NEGERI' as StatusSchool,
+  //       Stage: 'SMP' as StageType,
+  //     },
+  //   ],
+  // });
+  // #endregion
+  //
+
+  // #region Season
+  await prisma.season.createMany({
     skipDuplicates: true,
     data: [
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
-        Name: 'SD NEGERI 1 KANDANGAN',
-        Subdistrict: 'PESANGGARAN' as Subdistrict,
-        Ward: 'KANDANGAN',
-        Status: 'NEGERI' as StatusSchool,
-        Stage: 'SD' as StageType,
+        Name: '1',
+        StartDate: new Date('2025-02-23T00:00:00Z'),
+        EndDate: new Date('2025-05-01T00:00:00Z'),
+      },
+    ],
+  });
+  // #endregion
+
+  // #region Subject
+  await prisma.subject.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        Id: generateUuid(),
+        DateCreate: new Date(),
+        DateUpdate: new Date(),
+        Name: 'matematika',
       },
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
-        Name: 'SMP NEGERI 1 CLURING',
-        Subdistrict: 'CLURING' as Subdistrict,
-        Ward: 'CLURING',
-        Status: 'NEGERI' as StatusSchool,
-        Stage: 'SMP' as StageType,
+        Name: 'ipa',
+      },
+      {
+        Id: generateUuid(),
+        DateCreate: new Date(),
+        DateUpdate: new Date(),
+        Name: 'bahasa inggris',
+      },
+      {
+        Id: generateUuid(),
+        DateCreate: new Date(),
+        DateUpdate: new Date(),
+        Name: 'ips',
       },
     ],
   });
+  // #endregion
 }
 main()
   .then(async () => {
