@@ -68,6 +68,61 @@ export class EventController {
   }
   // #endregion
 
+  // #region detail
+  @Get('detail/:id')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])
+  async detail(@Req() request: Request, @Query('id') id: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbEvent = await this.prismaService.competition.findFirst({
+      where: { Id: id },
+      include: { Season: true, Subject: true, Kisi: true },
+    });
+
+    if (!dbEvent) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Event not found',
+        }),
+      );
+    }
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        name: dbEvent.Name,
+        description: dbEvent.Description,
+        date: dbEvent.Date,
+        level: dbEvent.Level,
+        stage: dbEvent.Stage,
+        price: dbEvent.Price,
+        location: dbEvent.Location,
+        season: dbEvent.Season.Name,
+        subjectId: dbEvent.Subject.Name,
+        kisi: dbEvent.Kisi.map((kisi) => ({
+          id: kisi.Id,
+          name: kisi.Content,
+        })),
+      },
+    });
+  }
+  // #endregion
+
   // #region save
   @Post('save')
   @Roles([Role.SUPERADMIN, Role.ADMIN])
