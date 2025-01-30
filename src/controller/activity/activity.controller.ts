@@ -78,6 +78,14 @@ export class ActivityController {
       include: { Payment: true },
     });
 
+    if (existingParticipant) {
+      return this.utilityService.globalResponse({
+        statusCode: 400,
+        message: 'Participant already registered',
+        data: { id: existingParticipant.Id },
+      });
+    }
+
     let paymentId = existingParticipant?.Payment?.Id;
     if (!paymentId) {
       const payment = await this.prismaService.payment.create({
