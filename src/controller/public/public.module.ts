@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ExampleController } from './example/example.controller';
-
+import { PublicController } from './public.controller';
 @Module({
-  controllers: [ExampleController],
+  controllers: [PublicController],
 })
 export class PublicModule {}

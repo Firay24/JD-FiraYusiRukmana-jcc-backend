@@ -13,6 +13,7 @@ import { EventModule } from './controller/event/event.module';
 import { ActivityModule } from './controller/activity/activity.module';
 import { PaymentModule } from './controller/payment/payment.module';
 import { RoleModule } from './controller/role/role.module';
+import { PublicController } from './controller/public/public.controller';
 
 @Module({
   imports: [
@@ -77,5 +78,6 @@ import { RoleModule } from './controller/role/role.module';
     PaymentModule,
     RoleModule,
   ],
+  controllers: [PublicController],
 })
 export class AppModule {}
