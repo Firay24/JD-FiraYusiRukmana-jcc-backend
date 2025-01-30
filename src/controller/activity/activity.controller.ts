@@ -126,11 +126,11 @@ export class ActivityController {
         CompetitionId: body.competitionId,
         CompetitionRoomId: body.competitionRommId,
         PaymentId: paymentId,
-        Attedance: body.attedance,
-        Score: body.score,
-        Correct: body.correct,
-        Incorrect: body.incorrect,
-        PathAnswer: body.pathAnswer,
+        Attedance: body.attedance ?? false,
+        Score: body.score ?? 0,
+        Correct: body.correct ?? 0,
+        Incorrect: body.incorrect ?? 0,
+        PathAnswer: body.pathAnswer ?? '',
       },
     });
 
