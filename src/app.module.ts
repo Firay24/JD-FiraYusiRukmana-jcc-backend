@@ -12,6 +12,7 @@ import { UserModule } from './controller/user/user.module';
 import { EventModule } from './controller/event/event.module';
 import { ActivityModule } from './controller/activity/activity.module';
 import { PaymentModule } from './controller/payment/payment.module';
+import { RoleModule } from './controller/role/role.module';
 
 @Module({
   imports: [
@@ -50,6 +51,10 @@ import { PaymentModule } from './controller/payment/payment.module';
         module: PaymentModule,
       },
       {
+        path: 'v1/role',
+        module: RoleModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -70,6 +75,7 @@ import { PaymentModule } from './controller/payment/payment.module';
     EventModule,
     ActivityModule,
     PaymentModule,
+    RoleModule,
   ],
 })
 export class AppModule {}
