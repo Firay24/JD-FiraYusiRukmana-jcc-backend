@@ -61,7 +61,7 @@ export class EventController {
   // #region list
   @Get('list')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])
-  async list(@Req() request: Request, @Query('page') page: number = 1) {
+  async list(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -77,14 +77,15 @@ export class EventController {
       );
     }
 
-    const pageSize = 20;
-    const skip = (page - 1) * pageSize;
+    limit = Math.max(1, Math.min(limit, 100));
+
+    const skip = (page - 1) * limit;
     const totalItems = await this.prismaService.competition.count();
-    const totalPages = Math.ceil(totalItems / pageSize);
+    const totalPages = Math.ceil(totalItems / limit);
 
     const dbEvent = await this.prismaService.competition.findMany({
       skip,
-      take: pageSize,
+      take: limit,
       include: { Season: true, Subject: true },
     });
 

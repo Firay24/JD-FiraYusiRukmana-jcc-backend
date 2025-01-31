@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -37,6 +37,70 @@ export class ActivityController {
     private prismaService: PrismaService,
     private utilityService: UtilityService,
   ) {}
+
+  // #region list
+  @Get('list')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async list(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbstudent = await this.prismaService.student.findFirst({
+      where: { IdUser: user.id },
+    });
+
+    limit = Math.max(1, Math.min(limit, 100));
+
+    const skip = (page - 1) * limit;
+    const totalItems = await this.prismaService.competition.count();
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      skip,
+      take: limit,
+      include: { Competition: { include: { Season: true, Subject: true, Region: true } }, Payment: true },
+      where: { StudentId: dbstudent?.Id },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        data: dbActivity.map((activity) => ({
+          id: activity.Id,
+          statusPayment: activity.Payment?.Status,
+          competition: {
+            name: activity.Competition.Name,
+            description: activity.Competition.Description,
+            date: activity.Competition.Date,
+            subject: activity.Competition.Subject.Name,
+            region: {
+              name: activity.Competition.Region.Name,
+              region: activity.Competition.Region.Region,
+            },
+            season: activity.Competition.Season.Name,
+          },
+        })),
+      },
+    });
+  }
+  // #endregion
 
   // #region save
   @Post('save')
