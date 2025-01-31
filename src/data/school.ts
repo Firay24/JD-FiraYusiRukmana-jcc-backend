@@ -1,0 +1,73 @@
+import { StageType, StatusSchool, Subdistrict } from '@prisma/client';
+export const schools = [
+  {
+    name: 'SD NEGERI 1 KANDANGAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'KANDANGAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 1 PESANGGARAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'PESANGGARAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 1 SARONGAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'SARONGAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 1 SUMBERAGUNG',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'SUMBERAGUNG',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 1 SUMBERMULYO',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'SUMBERMULYO',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 10 PESANGGARAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'PESANGGARAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 11 PESANGGARAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'PESANGGARAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 2 KANDANGAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'KANDANGAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 2 PESANGGARAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'PESANGGARAN',
+    status: StatusSchool.NEGERI,
+  },
+  {
+    name: 'SD NEGERI 2 SARONGAN',
+    stage: StageType.SD,
+    subdistrict: Subdistrict.PESANGGARAN,
+    ward: 'SARONGAN',
+    status: StatusSchool.NEGERI,
+  },
+];
