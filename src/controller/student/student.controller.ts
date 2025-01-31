@@ -15,6 +15,63 @@ export class StudentController {
     private utilityService: UtilityService,
   ) {}
 
+  // #region profile
+  @Get('dashboard/profile')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async profileDashboard(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbStudent = await this.prismaService.student.findFirst({
+      where: { IdUser: user.id },
+      include: { CompetitionParticipant: true },
+    });
+
+    if (!dbStudent) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Student not found',
+        }),
+      );
+    }
+
+    const averageScore = await this.prismaService.competitionParticipant.aggregate({
+      where: {
+        StudentId: dbStudent.Id,
+        Score: {
+          not: null,
+        },
+      },
+      _avg: { Score: true },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        nama: dbUser.Name,
+        username: dbUser.Username,
+        poin: dbStudent.Poin,
+        totalActivity: dbStudent.CompetitionParticipant.length,
+        avarageScore: averageScore._avg.Score,
+      },
+    });
+  }
+  // #endregion
+
   // #region save
   @Post('save')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
