@@ -163,6 +163,8 @@ export class StudentController {
       statusCode: 200,
       message: 'Success',
       data: {
+        id: dbStudent.Id,
+        userId: dbStudent.User.Id,
         name: dbStudent.User.Name,
         username: dbStudent.User.Username,
         gender: dbStudent.User.Gender,
