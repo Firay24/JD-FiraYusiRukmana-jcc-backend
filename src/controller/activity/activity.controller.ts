@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -37,6 +37,125 @@ export class ActivityController {
     private prismaService: PrismaService,
     private utilityService: UtilityService,
   ) {}
+
+  // #region get by id
+  @Get('detail/:id')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async detail(@Req() request: Request, @Param('id') id: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbActivity = await this.prismaService.competitionParticipant.findFirst({
+      where: { Id: id },
+      include: { Competition: { include: { Subject: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } } } } },
+    });
+
+    if (!dbActivity) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Activity not found',
+        }),
+      );
+    }
+
+    const latestStatusHistory = dbActivity.Payment.PaymentStatusHistory[0];
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        id: dbActivity.Id,
+        idParticipant: dbActivity.ParticipantId,
+        name: dbActivity.Student.User.Name,
+        school: dbActivity.Student.School.Name,
+        class: dbActivity.Student.Class,
+        stage: dbActivity.Competition.Stage,
+        phoneNumber: dbActivity.Student.User.PhoneNumber,
+        nik: dbActivity.Student.NIK,
+        location: dbActivity.Competition.Location,
+        room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
+        supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
+        subject: dbActivity.Competition.Subject.Name,
+        detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({
+          status: history.Status,
+          date: history.Date,
+        })),
+        latestStatus: {
+          status: latestStatusHistory.Status,
+          date: latestStatusHistory.Date,
+        },
+      },
+    });
+  }
+  // #endregion
+
+  // #region list all
+  @Get('list/all')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    limit = Math.max(1, Math.min(limit, 100));
+
+    const skip = (page - 1) * limit;
+    const totalItems = await this.prismaService.competition.count();
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      skip,
+      take: limit,
+      include: { Payment: true, Student: { include: { User: true, School: true } } },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        data: dbActivity.map((activity) => ({
+          id: activity.Id,
+          name: activity.Student.User.Name,
+          idParticipant: activity.ParticipantId,
+          school: activity.Student.School.Name,
+          class: activity.Student.Class,
+          stage: activity.Student.Stage,
+          phoneNumber: activity.Student.User.PhoneNumber,
+          nik: activity.Student.NIK,
+          payment: activity.Payment.Status,
+        })),
+      },
+    });
+  }
+  // #endregion
 
   // #region list
   @Get('list')
