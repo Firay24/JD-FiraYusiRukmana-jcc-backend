@@ -4,14 +4,18 @@ import * as bcryptjs from 'bcryptjs';
 import slugify from 'slugify';
 import { ConfigService } from '@nestjs/config';
 import * as sharp from 'sharp';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import * as mime from 'mime-types';
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class UtilityService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private prismaService: PrismaService,
+  ) {}
   public allowedMimeTypes = [
     'application/pdf',
     'application/msword',
@@ -60,6 +64,36 @@ export class UtilityService {
       password += characters[randomIndex];
     }
     return password;
+  }
+
+  public async generateParticipantId(competitionId: string): Promise<string> {
+    const competition = await this.prismaService.competition.findUnique({
+      where: { Id: competitionId },
+      include: { Season: true, Region: true, Subject: true },
+    });
+
+    if (!competition) throw new Error('Competition not found');
+    const seasonCode = competition.Season.Name.substring(0, 1);
+    const regionCode = competition.Region.Region.toString().slice(-2);
+    const subjectMap: Record<string, string> = {
+      matematika: 'M',
+      ipa: 'A',
+      ips: 'S',
+      'bahasa inggris': 'B',
+    };
+    const subjectCode = subjectMap[competition.Subject.Name] || 'X';
+
+    const count = await this.prismaService.competitionParticipant.count({
+      where: {
+        Competition: {
+          SeasonId: competition.SeasonId,
+          RegionId: competition.RegionId,
+        },
+      },
+    });
+
+    const participantNumber = (count + 1).toString().padStart(4, '0');
+    return `${seasonCode}${regionCode}${subjectCode}-${participantNumber}`;
   }
 
   public generateId() {

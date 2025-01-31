@@ -8,6 +8,7 @@ export class EventSaveDto {
   date: string;
   level: number;
   price: number;
+  regionId: string;
   location: string;
   seasonId: string;
   subjectId: string;
