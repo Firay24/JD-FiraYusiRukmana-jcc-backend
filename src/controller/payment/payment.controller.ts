@@ -51,7 +51,7 @@ export class PaymentController {
       where: { Id: id },
       data: {
         Invoice: body.invoice ?? dbPayment.Invoice,
-        Date: new Date(body.date) ?? dbPayment.Date,
+        Date: body.date ?? dbPayment.Date,
         Amount: body.amount ?? dbPayment.Amount,
         Status: body.status ?? dbPayment.Status,
       },

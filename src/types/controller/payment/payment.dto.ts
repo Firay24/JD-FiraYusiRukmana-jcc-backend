@@ -2,7 +2,7 @@ import { PaymentType } from '@prisma/client';
 
 export class PaymentSaveDto {
   invoice?: string;
-  date?: string;
+  date?: number;
   amount: number;
   status: PaymentType;
 }

@@ -156,7 +156,7 @@ export class ActivityController {
         data: {
           Id: this.utilityService.generateUuid(),
           Invoice: this.utilityService.generateInvoice(),
-          Date: new Date(),
+          Date: this.utilityService.getEpoch(new Date()),
           Amount: dbEvent.Price,
           Status: 'PENDING',
         },
@@ -203,7 +203,7 @@ export class ActivityController {
 
     return this.utilityService.globalResponse({
       statusCode: 200,
-      message: `Success ${body.id ? 'Update' : 'Create'} Student`,
+      message: `Success ${body.id ? 'Update' : 'Create'} Competition`,
       data: { id: competition.Id },
     });
   }
@@ -245,7 +245,7 @@ export class ActivityController {
       data: {
         Id: this.utilityService.generateUuid(),
         Invoice: this.utilityService.generateInvoice(),
-        Date: new Date(),
+        Date: this.utilityService.getEpoch(new Date()),
         Amount: 0,
         Status: 'PENDING',
       },
@@ -281,7 +281,7 @@ export class ActivityController {
             Username: row.username,
             Password: hashedPassword,
             RoleId: '67cb3b008ca0499c84fc',
-            Birthdate: new Date(row.birthdate),
+            Birthdate: this.utilityService.getEpoch(new Date(row.birthdate)),
             Gender: row.gender === 'Perempuan' ? false : true,
             PhoneNumber: row.phoneNumber,
           },

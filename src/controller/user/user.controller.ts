@@ -54,7 +54,7 @@ export class UserController {
         Email: email?.trim() || dbUser.Email,
         Password: updatedPassword,
         RoleId: roleId?.trim() || dbUser.RoleId,
-        Birthdate: birthdate ? new Date(birthdate) : dbUser.Birthdate,
+        Birthdate: birthdate ? Math.floor(new Date(birthdate).getTime() / 1000) : dbUser.Birthdate,
         Gender: gender || dbUser.Gender,
         PhoneNumber: phoneNumber?.trim() || dbUser.PhoneNumber,
       },
