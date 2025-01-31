@@ -161,6 +161,14 @@ export class ActivityController {
           Status: 'PENDING',
         },
       });
+      await this.prismaService.paymentStatusHistory.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          PaymentId: payment.Id,
+          Status: 'PENDING',
+          Date: this.utilityService.getEpoch(new Date()),
+        },
+      });
       paymentId = payment.Id;
     }
 
@@ -248,6 +256,15 @@ export class ActivityController {
         Date: this.utilityService.getEpoch(new Date()),
         Amount: 0,
         Status: 'PENDING',
+      },
+    });
+
+    await this.prismaService.paymentStatusHistory.create({
+      data: {
+        Id: this.utilityService.generateUuid(),
+        PaymentId: payment.Id,
+        Status: 'PENDING',
+        Date: this.utilityService.getEpoch(new Date()),
       },
     });
 

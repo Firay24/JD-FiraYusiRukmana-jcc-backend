@@ -57,6 +57,15 @@ export class PaymentController {
       },
     });
 
+    await this.prismaService.paymentStatusHistory.create({
+      data: {
+        Id: this.utilityService.generateUuid(),
+        PaymentId: payment.Id,
+        Status: body.status ?? dbPayment.Status,
+        Date: body.date ?? dbPayment.Date,
+      },
+    });
+
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Payment Updated Successfully',
