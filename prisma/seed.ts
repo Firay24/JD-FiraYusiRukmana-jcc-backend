@@ -136,7 +136,6 @@ async function main() {
   // });
   // #endregion
   //
-
   // #region Season
   // await prisma.season.createMany({
   //   skipDuplicates: true,
@@ -152,7 +151,6 @@ async function main() {
   //   ],
   // });
   // #endregion
-
   // #region Subject
   // await prisma.subject.createMany({
   //   skipDuplicates: true,
@@ -184,7 +182,6 @@ async function main() {
   //   ],
   // });
   // #endregion
-
   // #region Kisi
   await prisma.kisi.createMany({
     skipDuplicates: true,
@@ -194,17 +191,112 @@ async function main() {
         DateCreate: new Date(),
         DateUpdate: new Date(),
         Content: 'Bilangan bulat',
-        CompetitionId: '6c1af2293ad8456eb31f',
+        CompetitionId: '11e24f77366749e29794',
       },
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
         Content: 'Bilangan pecahan',
-        CompetitionId: '6c1af2293ad8456eb31f',
+        CompetitionId: '11e24f77366749e29794',
       },
     ],
   });
+  // #endregion
+  // #region Region
+  // await prisma.region.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 1,
+  //       Name: 'Regional 1 - Pesanggaran',
+  //       RegionDetail: 'Pesanggaran, Siliragung',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 2,
+  //       Name: 'Regional 2 - Purwoharjo',
+  //       RegionDetail: 'Purwoharjo, Tegaldlimo',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 3,
+  //       Name: 'Regional 3 - Srono',
+  //       RegionDetail: 'Srono, Muncar',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 4,
+  //       Name: 'Regional 4 - Pesanggaran',
+  //       RegionDetail: 'Pesanggaran, Siliragung',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 5,
+  //       Name: 'Regional 5 - Genteng',
+  //       RegionDetail: 'Genteng',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 6,
+  //       Name: 'Regional 6 - Glenmore',
+  //       RegionDetail: 'Glenmore, Kalibaru',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 7,
+  //       Name: 'Regional 7 - Sempu',
+  //       RegionDetail: 'Sempu, Songgon',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 8,
+  //       Name: 'Regional 8 - Rogojampi',
+  //       RegionDetail: 'Rogojampi, Singojuruh, Blimbingsari, Kabat',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 9,
+  //       Name: 'Regional 9 - Banyuwangi Kota',
+  //       RegionDetail: 'Banyuwangi, Glagah, Giri, Licin',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 10,
+  //       Name: 'Regional 10 - Wongsorejo',
+  //       RegionDetail: 'Wongsorejo, Kalipuro',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Region: 11,
+  //       Name: 'Regional 11 - Tegalsari',
+  //       RegionDetail: 'Tegalsari, Bangorejo',
+  //     },
+  //   ],
+  // });
   // #endregion
 }
 main()

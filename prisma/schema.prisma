@@ -95,9 +95,11 @@ model Competition {
   Price                  Int
   Location               String
   SeasonId               String
+  RegionId               String
   SubjectId              String
   CodePackage            String?
   PathAnswer             String?
+  Region                 Region                   @relation(fields: [RegionId], references: [Id])
   Season                 Season                   @relation(fields: [SeasonId], references: [Id])
   Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
   CompetitionParticipant CompetitionParticipant[]
@@ -106,6 +108,7 @@ model Competition {
   Tryout                 Tryout[]
   Subscription           Subscription[]
   Achievement            Achievement[]
+  regionId               String?
 }
 
 model Subscription {
@@ -144,11 +147,13 @@ model Subscription {
 // }
 
 model Region {
-  Id           String    @id
-  DateCreate   DateTime  @default(now())
-  DateUpdate   DateTime? @updatedAt
+  Id           String        @id
+  DateCreate   DateTime      @default(now())
+  DateUpdate   DateTime?     @updatedAt
+  Region       Int
   Name         String
   RegionDetail String
+  Competition  Competition[]
 }
 
 model Supervisor {
@@ -177,6 +182,7 @@ model CompetitionParticipant {
   Id                String           @id
   DateCreate        DateTime         @default(now())
   DateUpdate        DateTime?        @updatedAt
+  ParticipantId     String?
   StudentId         String
   CompetitionId     String
   CompetitionRoomId String?

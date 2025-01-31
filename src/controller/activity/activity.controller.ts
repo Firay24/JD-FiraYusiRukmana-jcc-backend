@@ -105,11 +105,13 @@ export class ActivityController {
     });
 
     const competitionParticipantId = dbCompetitionParticipant ? dbCompetitionParticipant.Id : this.utilityService.generateUuid();
+    const participantId = await this.utilityService.generateParticipantId(body.competitionId);
 
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
       update: {
         Id: competitionParticipantId,
+        ParticipantId: participantId,
         StudentId: body.studentId,
         CompetitionId: body.competitionId,
         CompetitionRoomId: body.competitionRommId,
@@ -122,6 +124,7 @@ export class ActivityController {
       },
       create: {
         Id: competitionParticipantId,
+        ParticipantId: participantId,
         StudentId: body.studentId,
         CompetitionId: body.competitionId,
         CompetitionRoomId: body.competitionRommId,
@@ -251,10 +254,12 @@ export class ActivityController {
       }
 
       totalAmount += dbEvent.Price;
+      const participantId = await this.utilityService.generateParticipantId(dbEvent.Id);
 
       await this.prismaService.competitionParticipant.create({
         data: {
           Id: this.utilityService.generateId(),
+          ParticipantId: participantId,
           StudentId: student.Id,
           CompetitionId: dbEvent.Id,
           PaymentId: payment.Id,
