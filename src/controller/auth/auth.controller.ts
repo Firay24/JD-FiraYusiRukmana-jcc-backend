@@ -86,7 +86,7 @@ export class AuthController {
     email = email ?? email.trim();
     password = password ? password.trim() : this.utilityService.generateRandomPassword();
     roleId = roleId.trim();
-    birthdate = birthdate.trim();
+    birthdate = birthdate;
     phoneNumber = phoneNumber.trim();
     gender = gender;
 
@@ -122,7 +122,7 @@ export class AuthController {
         Email: email,
         Password: hashedPassword,
         RoleId: roleId,
-        Birthdate: new Date(birthdate),
+        Birthdate: birthdate,
         Gender: gender,
         PhoneNumber: phoneNumber,
       },

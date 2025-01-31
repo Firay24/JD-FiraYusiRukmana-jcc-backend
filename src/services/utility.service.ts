@@ -66,6 +66,10 @@ export class UtilityService {
     return password;
   }
 
+  public getEpoch(date: Date = new Date()): number {
+    return Math.floor(date.getTime() / 1000);
+  }
+
   public async generateParticipantId(competitionId: string): Promise<string> {
     const competition = await this.prismaService.competition.findUnique({
       where: { Id: competitionId },

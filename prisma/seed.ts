@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RoleType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-// import * as bcryptjs from 'bcryptjs';
+import * as bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
@@ -20,11 +20,11 @@ dayjs.extend(utc);
 
 //   return `${dayjs().unix()}${result}`;
 // }
-// function hashPassword(password: string): string {
-//   const salt = bcryptjs.genSaltSync(10);
-//   const hash = bcryptjs.hashSync(password, salt);
-//   return hash;
-// }
+function hashPassword(password: string): string {
+  const salt = bcryptjs.genSaltSync(10);
+  const hash = bcryptjs.hashSync(password, salt);
+  return hash;
+}
 
 const generateUuid = () => {
   const uuid = uuidv4();
@@ -57,7 +57,7 @@ async function main() {
   //       Email: 'superadmin@mail.com',
   //       Password: hashPassword('junior12345'),
   //       RoleId: roles.find((a) => a.Name === RoleType.SUPERADMIN)?.Id,
-  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       Birthdate: 980955648,
   //       PhoneNumber: '08123456789',
   //       Gender: true,
   //     },
@@ -68,7 +68,7 @@ async function main() {
   //       Email: 'admin@mail.com',
   //       Password: hashPassword('junior12345'),
   //       RoleId: roles.find((a) => a.Name === RoleType.ADMIN)?.Id,
-  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       Birthdate: 980955648,
   //       PhoneNumber: '08123456789',
   //       Gender: false,
   //     },
@@ -79,7 +79,7 @@ async function main() {
   //       Email: 'eventadmin@mail.com',
   //       Password: hashPassword('junior12345'),
   //       RoleId: roles.find((a) => a.Name === RoleType.EVENTADMIN)?.Id,
-  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       Birthdate: 980955648,
   //       PhoneNumber: '08123456789',
   //       Gender: false,
   //     },
@@ -90,7 +90,7 @@ async function main() {
   //       Email: 'facilitator@mail.com',
   //       Password: hashPassword('junior12345'),
   //       RoleId: roles.find((a) => a.Name === RoleType.FACILITATOR)?.Id,
-  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       Birthdate: 980955648,
   //       PhoneNumber: '08123456789',
   //       Gender: false,
   //     },
@@ -101,7 +101,7 @@ async function main() {
   //       Email: 'participant@mail.com',
   //       Password: hashPassword('junior12345'),
   //       RoleId: roles.find((a) => a.Name === RoleType.PARTICIPANT)?.Id,
-  //       Birthdate: new Date('2001-01-19T00:00:00Z'),
+  //       Birthdate: 980955648,
   //       PhoneNumber: '08123456789',
   //       Gender: false,
   //     },
@@ -145,8 +145,8 @@ async function main() {
   //       DateCreate: new Date(),
   //       DateUpdate: new Date(),
   //       Name: '1',
-  //       StartDate: new Date('2025-02-23T00:00:00Z'),
-  //       EndDate: new Date('2025-05-01T00:00:00Z'),
+  //       StartDate: 1740325248,
+  //       EndDate: 1748792448,
   //     },
   //   ],
   // });
@@ -191,14 +191,14 @@ async function main() {
         DateCreate: new Date(),
         DateUpdate: new Date(),
         Content: 'Bilangan bulat',
-        CompetitionId: '11e24f77366749e29794',
+        CompetitionId: '3d25d0c6923d40198b0f',
       },
       {
         Id: generateUuid(),
         DateCreate: new Date(),
         DateUpdate: new Date(),
         Content: 'Bilangan pecahan',
-        CompetitionId: '11e24f77366749e29794',
+        CompetitionId: '3d25d0c6923d40198b0f',
       },
     ],
   });

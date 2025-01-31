@@ -23,7 +23,7 @@ model User {
   Username    String
   Password    String
   RoleId      String
-  Birthdate   DateTime
+  Birthdate   Int
   PhoneNumber String
   Gender      Boolean
   Email       String?       @unique
@@ -70,8 +70,8 @@ model Season {
   DateCreate  DateTime      @default(now())
   DateUpdate  DateTime?     @updatedAt
   Name        String
-  StartDate   DateTime
-  EndDate     DateTime
+  StartDate   Int
+  EndDate     Int
   Competition Competition[]
 }
 
@@ -89,7 +89,7 @@ model Competition {
   DateUpdate             DateTime?                @updatedAt
   Name                   String
   Description            String
-  Date                   DateTime
+  Date                   Int
   Level                  Int
   Stage                  StageType
   Price                  Int
@@ -161,7 +161,7 @@ model Supervisor {
   DateCreate      DateTime          @default(now())
   DateUpdate      DateTime?         @updatedAt
   Name            String
-  Birthdate       DateTime
+  Birthdate       Int
   PhoneNumber     String
   CompetitionRoom CompetitionRoom[]
 }
@@ -243,7 +243,7 @@ model Payment {
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
   Invoice                String
-  Date                   DateTime
+  Date                   Int
   Amount                 Int
   Status                 PaymentType
   CompetitionParticipant CompetitionParticipant[]

@@ -5,7 +5,7 @@ export class EventSaveDto {
   name: string;
   description: string;
   stage: StageType;
-  date: string;
+  date: number;
   level: number;
   price: number;
   regionId: string;
