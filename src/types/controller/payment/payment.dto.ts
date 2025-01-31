@@ -5,4 +5,5 @@ export class PaymentSaveDto {
   date?: number;
   amount: number;
   status: PaymentType;
+  ward: string;
 }
