@@ -36,7 +36,7 @@ export class PaymentController {
 
     const dbPayment = await this.prismaService.payment.findFirst({
       where: { Id: id },
-      include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } } },
+      include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } }, CompetitionParticipant: { include: { Competition: { include: { Season: true, Subject: true, Region: true } } } } },
     });
 
     if (!dbPayment) {
@@ -48,11 +48,7 @@ export class PaymentController {
       );
     }
 
-    // const dbCompetition = await this.prismaService.competition.findFirst({
-    //   where: { CompetitionParticipant },
-    //   include: { Season: true, Region: true, Subject: true },
-    // });
-
+    const competiiton = dbPayment.CompetitionParticipant[0].Competition;
     const latestStatusHistory = dbPayment.PaymentStatusHistory[0];
 
     return this.utilityService.globalResponse({
@@ -64,6 +60,23 @@ export class PaymentController {
         date: dbPayment.Date,
         amount: dbPayment.Amount,
         status: dbPayment.Status,
+        competition: {
+          id: competiiton.Id,
+          name: competiiton.Name,
+          price: competiiton.Price,
+          season: {
+            id: competiiton.Season.Id,
+            name: competiiton.Season.Name,
+          },
+          subject: {
+            id: competiiton.Subject.Id,
+            name: competiiton.Subject.Name,
+          },
+          region: {
+            id: competiiton.Region.Id,
+            name: competiiton.Region.Name,
+          },
+        },
         detailStatus: dbPayment.PaymentStatusHistory.map((history) => ({
           status: history.Status,
           date: history.Date,
