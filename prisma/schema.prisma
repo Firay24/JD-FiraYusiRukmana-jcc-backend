@@ -247,6 +247,17 @@ model Payment {
   Amount                 Int
   Status                 PaymentType
   CompetitionParticipant CompetitionParticipant[]
+  PaymentStatusHistory   PaymentStatusHistory[]
+}
+
+model PaymentStatusHistory {
+  Id         String      @id
+  DateCreate DateTime    @default(now())
+  DateUpdate DateTime?   @updatedAt
+  PaymentId  String
+  Status     PaymentType
+  Date       Int
+  Payment    Payment     @relation(fields: [PaymentId], references: [Id])
 }
 
 model School {
