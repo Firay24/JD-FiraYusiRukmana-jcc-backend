@@ -13,7 +13,7 @@ import { EventModule } from './controller/event/event.module';
 import { ActivityModule } from './controller/activity/activity.module';
 import { PaymentModule } from './controller/payment/payment.module';
 import { RoleModule } from './controller/role/role.module';
-import { PublicController } from './controller/public/public.controller';
+import { SchoolModule } from './controller/school/school.module';
 
 @Module({
   imports: [
@@ -56,6 +56,10 @@ import { PublicController } from './controller/public/public.controller';
         module: RoleModule,
       },
       {
+        path: 'v1/school',
+        module: SchoolModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -77,7 +81,7 @@ import { PublicController } from './controller/public/public.controller';
     ActivityModule,
     PaymentModule,
     RoleModule,
+    SchoolModule,
   ],
-  controllers: [PublicController],
 })
 export class AppModule {}
