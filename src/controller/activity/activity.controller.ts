@@ -78,8 +78,11 @@ export class ActivityController {
       message: 'Success',
       data: {
         id: dbActivity.Id,
-        idParticipant: dbActivity.ParticipantId,
+        participantId: dbActivity.ParticipantId,
+        paymentId: dbActivity.PaymentId,
         student: {
+          studentId: dbActivity.StudentId,
+          userId: dbActivity.Student.User.Id,
           name: dbActivity.Student.User.Name,
           school: dbActivity.Student.School.Name,
           class: dbActivity.Student.Class,
@@ -87,7 +90,7 @@ export class ActivityController {
           phoneNumber: dbActivity.Student.User.PhoneNumber,
           nik: dbActivity.Student.NIK,
         },
-        competiiton: {
+        events: {
           location: dbActivity.Competition.Location,
           room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
           supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
