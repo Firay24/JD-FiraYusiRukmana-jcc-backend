@@ -89,6 +89,7 @@ export class ActivityController {
         room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
         supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
         subject: dbActivity.Competition.Subject.Name,
+        price: dbActivity.Payment.Amount,
         detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({
           status: history.Status,
           date: history.Date,
