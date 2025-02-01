@@ -14,6 +14,7 @@ import { ActivityModule } from './controller/activity/activity.module';
 import { PaymentModule } from './controller/payment/payment.module';
 import { RoleModule } from './controller/role/role.module';
 import { SchoolModule } from './controller/school/school.module';
+import { SubjectModule } from './controller/subject/subject.module';
 
 @Module({
   imports: [
@@ -60,6 +61,10 @@ import { SchoolModule } from './controller/school/school.module';
         module: SchoolModule,
       },
       {
+        path: 'v1/subject',
+        module: SubjectModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -82,6 +87,7 @@ import { SchoolModule } from './controller/school/school.module';
     PaymentModule,
     RoleModule,
     SchoolModule,
+    SubjectModule,
   ],
 })
 export class AppModule {}
