@@ -192,12 +192,11 @@ export class AuthController {
           name: user.Name,
         },
       });
-    } catch (error) {
+    } catch {
       // Jika terjadi error selama proses, kembalikan respons error
       return this.utilityService.globalResponse({
         res,
         statusCode: 401,
-        message: `Failed to authenticate user ${error.message}`,
       });
     }
   }
