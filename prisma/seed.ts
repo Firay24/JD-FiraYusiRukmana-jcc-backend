@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StageType, StatusSchool, Subdistrict } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -6,6 +6,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 // import * as bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { schools } from '../src/data/school';
 
 dayjs.extend(utc);
 
@@ -33,6 +34,19 @@ const generateUuid = () => {
 };
 
 async function main() {
+  // #region school
+  await prisma.school.createMany({
+    skipDuplicates: true,
+    data: schools.map((school) => ({
+      Id: generateUuid(),
+      Name: school.name,
+      Stage: school.stage as StageType,
+      Subdistrict: school.subdistrict as Subdistrict,
+      Ward: school.ward,
+      Status: school.status as StatusSchool,
+    })),
+  });
+  // #endregion
   // #region Role
   // const roles = [
   //   { Id: generateUuid(), Name: RoleType.SUPERADMIN },
@@ -183,25 +197,25 @@ async function main() {
   // });
   // #endregion
   // #region Kisi
-  await prisma.kisi.createMany({
-    skipDuplicates: true,
-    data: [
-      {
-        Id: generateUuid(),
-        DateCreate: new Date(),
-        DateUpdate: new Date(),
-        Content: 'Bilangan bulat',
-        CompetitionId: '3d25d0c6923d40198b0f',
-      },
-      {
-        Id: generateUuid(),
-        DateCreate: new Date(),
-        DateUpdate: new Date(),
-        Content: 'Bilangan pecahan',
-        CompetitionId: '3d25d0c6923d40198b0f',
-      },
-    ],
-  });
+  // await prisma.kisi.createMany({
+  //   skipDuplicates: true,
+  //   data: [
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Content: 'Bilangan bulat',
+  //       CompetitionId: '3d25d0c6923d40198b0f',
+  //     },
+  //     {
+  //       Id: generateUuid(),
+  //       DateCreate: new Date(),
+  //       DateUpdate: new Date(),
+  //       Content: 'Bilangan pecahan',
+  //       CompetitionId: '3d25d0c6923d40198b0f',
+  //     },
+  //   ],
+  // });
   // #endregion
   // #region Region
   // await prisma.region.createMany({
