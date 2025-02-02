@@ -99,6 +99,7 @@ export class ActivityController {
           level: dbActivity.Competition.Level,
           stage: dbActivity.Competition.Stage,
           subject: dbActivity.Competition.Subject.Name,
+          date: dbActivity.Competition.Date,
           location: dbActivity.Competition.Location,
           room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
           supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
