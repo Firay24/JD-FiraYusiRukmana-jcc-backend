@@ -81,6 +81,7 @@ export class ActivityController {
         participantId: dbActivity.ParticipantId,
         paymentId: dbActivity.PaymentId,
         paymentDate: dbActivity.Payment.Date,
+        invoice: dbActivity.Payment.Invoice,
         student: {
           studentId: dbActivity.StudentId,
           userId: dbActivity.Student.User.Id,
