@@ -59,7 +59,7 @@ export class ActivityController {
 
     const dbActivity = await this.prismaService.competitionParticipant.findFirst({
       where: { Id: id },
-      include: { Competition: { include: { Subject: true, Season: true, Region: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } } } } },
+      include: { Competition: { include: { Subject: true, Season: true, Region: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'asc' } } } } },
     });
 
     if (!dbActivity) {
@@ -71,7 +71,7 @@ export class ActivityController {
       );
     }
 
-    const latestStatusHistory = dbActivity.Payment.PaymentStatusHistory[0];
+    const latestStatusHistory = dbActivity.Payment.PaymentStatusHistory.length > 0 ? dbActivity.Payment.PaymentStatusHistory[dbActivity.Payment.PaymentStatusHistory.length - 1] : null;
 
     return this.utilityService.globalResponse({
       statusCode: 200,
