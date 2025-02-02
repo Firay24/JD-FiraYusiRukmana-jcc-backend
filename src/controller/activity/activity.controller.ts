@@ -59,7 +59,7 @@ export class ActivityController {
 
     const dbActivity = await this.prismaService.competitionParticipant.findFirst({
       where: { Id: id },
-      include: { Competition: { include: { Subject: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } } } } },
+      include: { Competition: { include: { Subject: true, Season: true, Region: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } } } } },
     });
 
     if (!dbActivity) {
@@ -93,13 +93,15 @@ export class ActivityController {
           nik: dbActivity.Student.NIK,
         },
         events: {
-          location: dbActivity.Competition.Location,
-          room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
-          supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
-          subject: dbActivity.Competition.Subject.Name,
+          season: dbActivity.Competition.Season.Name,
+          region: dbActivity.Competition.Region.Region.toString(),
           price: dbActivity.Payment.Amount,
           level: dbActivity.Competition.Level,
           stage: dbActivity.Competition.Stage,
+          subject: dbActivity.Competition.Subject.Name,
+          location: dbActivity.Competition.Location,
+          room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
+          supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
         },
         detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({
           status: history.Status,
