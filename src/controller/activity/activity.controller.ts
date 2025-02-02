@@ -206,6 +206,7 @@ export class ActivityController {
       take: limit,
       include: { Competition: { include: { Season: true, Subject: true, Region: true } }, Payment: true },
       where: { StudentId: dbstudent?.Id },
+      orderBy: { DateCreate: 'desc' },
     });
 
     return this.utilityService.globalResponse({
