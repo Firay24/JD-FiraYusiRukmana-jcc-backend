@@ -144,7 +144,7 @@ export class AuthController {
       return this.utilityService.globalResponse({
         res,
         statusCode: 401,
-        message: 'Not authenticated',
+        // message: 'Not authenticated',
       });
     }
 
