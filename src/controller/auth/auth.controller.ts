@@ -83,7 +83,7 @@ export class AuthController {
     let { username, password, email, name, roleId, birthdate, gender, phoneNumber } = body;
     username = username.toLowerCase().trim();
     name = name.trim();
-    email = email ?? email.trim();
+    email = email ? email.trim() : '';
     password = password ? password.trim() : this.utilityService.generateRandomPassword();
     roleId = roleId.trim();
     birthdate = birthdate;

@@ -39,13 +39,19 @@ export class StudentController {
       include: { CompetitionParticipant: true },
     });
 
+    // if (!dbStudent) {
+    //   throw new BadRequestException(
+    //     this.utilityService.globalResponse({
+    //       statusCode: 400,
+    //       message: 'Student not found',
+    //     }),
+    //   );
+    // }
+
     if (!dbStudent) {
-      throw new BadRequestException(
-        this.utilityService.globalResponse({
-          statusCode: 400,
-          message: 'Student not found',
-        }),
-      );
+      return this.utilityService.globalResponse({
+        statusCode: 204,
+      });
     }
 
     const averageScore = await this.prismaService.competitionParticipant.aggregate({
@@ -159,6 +165,12 @@ export class StudentController {
       include: { School: true, User: true },
     });
 
+    if (!dbStudent) {
+      return this.utilityService.globalResponse({
+        statusCode: 204,
+      });
+    }
+
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Success',
@@ -172,6 +184,7 @@ export class StudentController {
         phoneNumber: dbStudent.User.PhoneNumber,
         address: dbStudent.Address,
         school: dbStudent.School.Name,
+        idSchool: dbStudent.School.Id,
         stage: dbStudent.Stage,
         class: dbStudent.Class,
         nik: dbStudent.NIK,
