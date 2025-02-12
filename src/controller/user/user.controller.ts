@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Put, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -14,6 +14,34 @@ export class UserController {
     private prismaService: PrismaService,
     private utilityService: UtilityService,
   ) {}
+
+  @Get('user')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async user(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'User Found Successfully',
+      data: {
+        id: dbUser.Id,
+        username: dbUser.Username,
+        email: dbUser.Email,
+        name: dbUser.Name,
+        birthday: dbUser.Birthdate,
+        gender: dbUser.Gender,
+        phoneNumber: dbUser.PhoneNumber,
+        role: {
+          id: dbUser.Role.Id,
+          name: dbUser.Role.Name,
+        },
+      },
+    });
+  }
 
   @Put('update')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
@@ -54,7 +82,7 @@ export class UserController {
         Email: email?.trim() || dbUser.Email,
         Password: updatedPassword,
         RoleId: roleId?.trim() || dbUser.RoleId,
-        Birthdate: birthdate ? Math.floor(new Date(birthdate).getTime() / 1000) : dbUser.Birthdate,
+        Birthdate: birthdate ? birthdate : dbUser.Birthdate,
         Gender: gender || dbUser.Gender,
         PhoneNumber: phoneNumber?.trim() || dbUser.PhoneNumber,
       },
