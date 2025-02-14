@@ -4,7 +4,7 @@ import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { PrismaService } from 'src/services/prisma.service';
 import { UtilityService } from 'src/services/utility.service';
-import { CompetitionSaveDto } from 'src/types/controller/competition/competition.dto';
+import { CompetitionCreateDto, CompetitionSaveDto } from 'src/types/controller/competition/competition.dto';
 import { Request } from 'express';
 import * as fs from 'fs';
 import * as xlsx from 'xlsx';
@@ -348,6 +348,108 @@ export class ActivityController {
       statusCode: 200,
       message: `Success ${body.id ? 'Update' : 'Create'} Competition`,
       data: { id: competition.Id },
+    });
+  }
+  // #endregion
+
+  // #region create
+  @Post('create')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async createActivity(@Req() request: Request, @Body() body: CompetitionCreateDto) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    if (!body.competitionId || body.competitionId.length === 0) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'At least one competiiton must be selected',
+        }),
+      );
+    }
+
+    const dbEvent = await this.prismaService.competition.findMany({
+      where: { Id: { in: body.competitionId } },
+    });
+
+    if (dbEvent.length !== body.competitionId.length) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'One or more competitions not found',
+        }),
+      );
+    }
+
+    const existingParticipants = await this.prismaService.competitionParticipant.findMany({
+      where: {
+        StudentId: body.studentId,
+        CompetitionId: { in: body.competitionId },
+      },
+      include: { Payment: true },
+    });
+
+    let paymentId = existingParticipants.length > 0 ? existingParticipants[0].Payment?.Id : undefined;
+    if (!paymentId) {
+      const payment = await this.prismaService.payment.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          Invoice: this.utilityService.generateInvoice(),
+          Date: this.utilityService.getEpoch(new Date()),
+          Amount: body.amount,
+          Status: 'PENDING',
+        },
+      });
+      await this.prismaService.paymentStatusHistory.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          PaymentId: payment.Id,
+          Status: 'PENDING',
+          Date: this.utilityService.getEpoch(new Date()),
+        },
+      });
+      paymentId = payment.Id;
+    }
+
+    const createdParticipants = [];
+    for (const competitionId of body.competitionId) {
+      const participantId = await this.utilityService.generateParticipantId(competitionId);
+
+      const competition = await this.prismaService.competitionParticipant.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          ParticipantId: participantId,
+          StudentId: body.studentId,
+          CompetitionId: competitionId,
+          CompetitionRoomId: body.competitionRommId,
+          PaymentId: paymentId, // Semua peserta dalam satu pembayaran
+          Attedance: body.attedance ?? false,
+          Score: body.score ?? 0,
+          Correct: body.correct ?? 0,
+          Incorrect: body.incorrect ?? 0,
+          PathAnswer: body.pathAnswer ?? '',
+        },
+      });
+
+      createdParticipants.push(competition);
+    }
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: `Success ${body.id ? 'Update' : 'Create'} Competition`,
+      data: createdParticipants.map((p) => ({ id: p.Id })),
     });
   }
   // #endregion
