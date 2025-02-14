@@ -93,8 +93,9 @@ export class ActivityController {
           nik: dbActivity.Student.NIK,
         },
         events: {
+          name: dbActivity.Competition.Name,
           season: dbActivity.Competition.Season.Name,
-          region: dbActivity.Competition.Region.Region.toString(),
+          region: dbActivity.Competition.Region.Name,
           price: dbActivity.Payment.Amount,
           level: dbActivity.Competition.Level,
           stage: dbActivity.Competition.Stage,
