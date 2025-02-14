@@ -451,7 +451,7 @@ export class ActivityController {
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: `Success ${body.id ? 'Update' : 'Create'} Competition`,
-      data: createdParticipants.map((p) => ({ id: p.Id })),
+      data: { id: paymentId },
     });
   }
   // #endregion
