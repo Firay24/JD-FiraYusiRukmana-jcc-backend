@@ -15,6 +15,57 @@ export class PaymentController {
     private utilityService: UtilityService,
   ) {}
 
+  // #region getall by id
+  @Get('user')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async getall(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbStudent = await this.prismaService.student.findFirst({
+      where: { IdUser: user.id },
+    });
+
+    if (!dbStudent) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Student not found',
+        }),
+      );
+    }
+
+    const dbCompetitionParticipant = await this.prismaService.competitionParticipant.findMany({
+      where: { StudentId: dbStudent.Id },
+      include: { Payment: true },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbCompetitionParticipant.map((participant) => ({
+        id: participant.Payment?.Id ?? null,
+        invoice: participant.Payment?.Invoice ?? '',
+        date: participant.Payment?.Date ?? null,
+        amount: participant.Payment?.Amount ?? 0,
+        status: participant.Payment?.Status ?? '',
+      })),
+    });
+  }
+  // #endregion
+
   // #region get by id
   @Get('get/:id')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
@@ -48,7 +99,7 @@ export class PaymentController {
       );
     }
 
-    const competiiton = dbPayment.CompetitionParticipant[0].Competition;
+    // const competiiton = dbPayment.CompetitionParticipant[0].Competition;
     const latestStatusHistory = dbPayment.PaymentStatusHistory[0];
 
     return this.utilityService.globalResponse({
@@ -60,23 +111,23 @@ export class PaymentController {
         date: dbPayment.Date,
         amount: dbPayment.Amount,
         status: dbPayment.Status,
-        competition: {
-          id: competiiton.Id,
-          name: competiiton.Name,
-          price: competiiton.Price,
+        competition: dbPayment.CompetitionParticipant.map((participant) => ({
+          id: participant.Competition?.Id ?? null,
+          name: participant.Competition?.Name ?? '',
+          price: participant.Competition?.Price ?? 0,
           season: {
-            id: competiiton.Season.Id,
-            name: competiiton.Season.Name,
+            id: participant.Competition?.Season?.Id ?? null,
+            name: participant.Competition?.Season?.Name ?? '',
           },
           subject: {
-            id: competiiton.Subject.Id,
-            name: competiiton.Subject.Name,
+            id: participant.Competition?.Subject?.Id ?? null,
+            name: participant.Competition?.Subject?.Name ?? '',
           },
           region: {
-            id: competiiton.Region.Id,
-            name: competiiton.Region.Name,
+            id: participant.Competition?.Region?.Id ?? null,
+            name: participant.Competition?.Region?.Name ?? '',
           },
-        },
+        })),
         detailStatus: dbPayment.PaymentStatusHistory.map((history) => ({
           status: history.Status,
           date: history.Date,
