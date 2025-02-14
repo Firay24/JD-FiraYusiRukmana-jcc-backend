@@ -225,6 +225,7 @@ export class ActivityController {
             description: activity.Competition.Description,
             date: activity.Competition.Date,
             subject: activity.Competition.Subject.Name,
+            location: activity.Competition.Location,
             region: {
               name: activity.Competition.Region.Name,
               region: activity.Competition.Region.Region,

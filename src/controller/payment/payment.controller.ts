@@ -52,16 +52,25 @@ export class PaymentController {
       include: { Payment: true },
     });
 
+    const uniquePayments = new Map();
+
+    dbCompetitionParticipant.forEach((participant) => {
+      const payment = participant.Payment;
+      if (payment && !uniquePayments.has(payment.Invoice)) {
+        uniquePayments.set(payment.Invoice, {
+          id: payment.Id,
+          invoice: payment.Invoice,
+          date: payment.Date,
+          amount: payment.Amount,
+          status: payment.Status,
+        });
+      }
+    });
+
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Success',
-      data: dbCompetitionParticipant.map((participant) => ({
-        id: participant.Payment?.Id ?? null,
-        invoice: participant.Payment?.Invoice ?? '',
-        date: participant.Payment?.Date ?? null,
-        amount: participant.Payment?.Amount ?? 0,
-        status: participant.Payment?.Status ?? '',
-      })),
+      data: Array.from(uniquePayments.values()),
     });
   }
   // #endregion
