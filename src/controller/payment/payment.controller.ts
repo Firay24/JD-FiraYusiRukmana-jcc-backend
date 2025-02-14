@@ -124,6 +124,8 @@ export class PaymentController {
           id: participant.Competition?.Id ?? null,
           name: participant.Competition?.Name ?? '',
           price: participant.Competition?.Price ?? 0,
+          stage: participant.Competition.Stage,
+          level: participant.Competition.Level,
           season: {
             id: participant.Competition?.Season?.Id ?? null,
             name: participant.Competition?.Season?.Name ?? '',
