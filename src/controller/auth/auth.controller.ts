@@ -16,6 +16,7 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
+  // #region sign-in
   @Post('sign-in')
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() body: AuthDto, @Res() res: Response) {
@@ -65,7 +66,9 @@ export class AuthController {
       },
     });
   }
+  // #endregion
 
+  // #region sign-out
   @Post('sign-out')
   async signOut(@Res() res: Response) {
     this.jwtService.clearTokenCookie(res);
@@ -77,13 +80,16 @@ export class AuthController {
     });
   }
 
+  // #endregion
+
+  // #region sign-up
   @Post('sign-up')
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() body: AuthDto) {
     let { username, password, email, name, roleId, birthdate, gender, phoneNumber } = body;
     username = username.toLowerCase().trim();
     name = name.trim();
-    email = email ? email.trim() : '';
+    email = email ? email.trim() : null;
     password = password ? password.trim() : this.utilityService.generateRandomPassword();
     roleId = roleId.trim();
     birthdate = birthdate;
@@ -133,7 +139,9 @@ export class AuthController {
       message: 'User Created',
     });
   }
+  // #endregion
 
+  // #region logged
   @Get('logged')
   async logged(@Req() req: Request, @Res() res: Response) {
     // Ambil token dari cookie
@@ -200,7 +208,9 @@ export class AuthController {
       });
     }
   }
+  // #endregion
 
+  // #region refresh
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const jwt: JwtDto = JSON.parse(req.cookies.jwt ?? '{}');
@@ -224,4 +234,5 @@ export class AuthController {
       });
     }
   }
+  // #endregion
 }
