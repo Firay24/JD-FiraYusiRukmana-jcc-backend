@@ -1,4 +1,4 @@
-import { PrismaClient, StageType, StatusSchool, Subdistrict } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -6,7 +6,10 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 // import * as bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { schools } from '../src/data/school';
+// import { schools } from '../src/data/school';
+import { kisikisi } from '../src/data/kisi-kisi';
+// import { regionsOfBwi } from '../src/data/region';
+// import { competitions } from '../src/data/competition';
 
 dayjs.extend(utc);
 
@@ -35,17 +38,17 @@ const generateUuid = () => {
 
 async function main() {
   // #region school
-  await prisma.school.createMany({
-    skipDuplicates: true,
-    data: schools.map((school) => ({
-      Id: generateUuid(),
-      Name: school.name,
-      Stage: school.stage as StageType,
-      Subdistrict: school.subdistrict as Subdistrict,
-      Ward: school.ward,
-      Status: school.status as StatusSchool,
-    })),
-  });
+  // await prisma.school.createMany({
+  //   skipDuplicates: true,
+  //   data: schools.map((school) => ({
+  //     Id: generateUuid(),
+  //     Name: school.name,
+  //     Stage: school.stage as StageType,
+  //     Subdistrict: school.subdistrict as Subdistrict,
+  //     Ward: school.ward,
+  //     Status: school.status as StatusSchool,
+  //   })),
+  // });
   // #endregion
   // #region Role
   // const roles = [
@@ -122,33 +125,6 @@ async function main() {
   //   ],
   // });
   // #endregion
-  // #region School
-  // await prisma.school.createMany({
-  //   skipDuplicates: true,
-  //   data: [
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Name: 'SD NEGERI 1 KANDANGAN',
-  //       Subdistrict: 'PESANGGARAN' as Subdistrict,
-  //       Ward: 'KANDANGAN',
-  //       Status: 'NEGERI' as StatusSchool,
-  //       Stage: 'SD' as StageType,
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Name: 'SMP NEGERI 1 CLURING',
-  //       Subdistrict: 'CLURING' as Subdistrict,
-  //       Ward: 'CLURING',
-  //       Status: 'NEGERI' as StatusSchool,
-  //       Stage: 'SMP' as StageType,
-  //     },
-  //   ],
-  // });
-  // #endregion
   //
   // #region Season
   // await prisma.season.createMany({
@@ -197,121 +173,51 @@ async function main() {
   // });
   // #endregion
   // #region Kisi
-  // await prisma.kisi.createMany({
-  //   skipDuplicates: true,
-  //   data: [
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Content: 'Bilangan bulat',
-  //       CompetitionId: '3d25d0c6923d40198b0f',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Content: 'Bilangan pecahan',
-  //       CompetitionId: '3d25d0c6923d40198b0f',
-  //     },
-  //   ],
-  // });
+  await prisma.kisi.createMany({
+    skipDuplicates: true,
+    data: kisikisi.map((kisi) => ({
+      Id: generateUuid(),
+      DateCreate: new Date(),
+      DateUpdate: new Date(),
+      Content: kisi.content,
+      CompetitionId: kisi.competitionId,
+    })),
+  });
   // #endregion
   // #region Region
   // await prisma.region.createMany({
   //   skipDuplicates: true,
-  //   data: [
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 1,
-  //       Name: 'Regional 1 - Pesanggaran',
-  //       RegionDetail: 'Pesanggaran, Siliragung',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 2,
-  //       Name: 'Regional 2 - Purwoharjo',
-  //       RegionDetail: 'Purwoharjo, Tegaldlimo',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 3,
-  //       Name: 'Regional 3 - Srono',
-  //       RegionDetail: 'Srono, Muncar',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 4,
-  //       Name: 'Regional 4 - Pesanggaran',
-  //       RegionDetail: 'Pesanggaran, Siliragung',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 5,
-  //       Name: 'Regional 5 - Genteng',
-  //       RegionDetail: 'Genteng',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 6,
-  //       Name: 'Regional 6 - Glenmore',
-  //       RegionDetail: 'Glenmore, Kalibaru',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 7,
-  //       Name: 'Regional 7 - Sempu',
-  //       RegionDetail: 'Sempu, Songgon',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 8,
-  //       Name: 'Regional 8 - Rogojampi',
-  //       RegionDetail: 'Rogojampi, Singojuruh, Blimbingsari, Kabat',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 9,
-  //       Name: 'Regional 9 - Banyuwangi Kota',
-  //       RegionDetail: 'Banyuwangi, Glagah, Giri, Licin',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 10,
-  //       Name: 'Regional 10 - Wongsorejo',
-  //       RegionDetail: 'Wongsorejo, Kalipuro',
-  //     },
-  //     {
-  //       Id: generateUuid(),
-  //       DateCreate: new Date(),
-  //       DateUpdate: new Date(),
-  //       Region: 11,
-  //       Name: 'Regional 11 - Tegalsari',
-  //       RegionDetail: 'Tegalsari, Bangorejo',
-  //     },
-  //   ],
+  //   data: regionsOfBwi.map((region) => ({
+  //     Id: generateUuid(),
+  //     DateCreate: new Date(),
+  //     DateUpdate: new Date(),
+  //     Region: region.region,
+  //     Name: region.name,
+  //     RegionDetail: region.regionDetail,
+  //   })),
   // });
   // #endregion
+  // #region Competition
+  // await prisma.competition.createMany({
+  //   skipDuplicates: true,
+  //   data: competitions.map((competition) => ({
+  //     Id: generateUuid(),
+  //     DateCreate: new Date(),
+  //     DateUpdate: new Date(),
+  //     Name: competition.name,
+  //     Description: competition.description,
+  //     Date: competition.date,
+  //     Level: competition.level,
+  //     Stage: competition.stage as StageType,
+  //     Price: competition.price,
+  //     RegionId: competition.regionId,
+  //     Location: competition.location,
+  //     SeasonId: competition.seasonId,
+  //     SubjectId: competition.subjectId,
+  //     CodePackage: competition.codePackage,
+  //     PathAnswer: competition.pathAnswer,
+  //   })),
+  // });
 }
 main()
   .then(async () => {

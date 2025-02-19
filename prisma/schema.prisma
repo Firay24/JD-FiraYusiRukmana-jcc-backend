@@ -24,6 +24,7 @@ model User {
   Password    String
   RoleId      String
   Birthdate   Int
+  BirthPlace  String?
   PhoneNumber String
   Gender      Boolean
   Email       String?       @unique
@@ -37,6 +38,7 @@ model Student {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
+  IdMember               String?
   Address                String
   Stage                  StageType
   Class                  String
