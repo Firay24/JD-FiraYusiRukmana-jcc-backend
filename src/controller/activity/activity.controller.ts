@@ -314,7 +314,7 @@ export class ActivityController {
     });
 
     const competitionParticipantId = dbCompetitionParticipant ? dbCompetitionParticipant.Id : this.utilityService.generateUuid();
-    const participantId = await this.utilityService.generateParticipantId(body.competitionId);
+    const participantId = await this.utilityService.generateParticipantId(body.competitionId, body.studentId);
 
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
@@ -427,7 +427,7 @@ export class ActivityController {
 
     const createdParticipants = [];
     for (const competitionId of body.competitionId) {
-      const participantId = await this.utilityService.generateParticipantId(competitionId);
+      const participantId = await this.utilityService.generateParticipantId(competitionId, body.studentId);
 
       const competition = await this.prismaService.competitionParticipant.create({
         data: {
@@ -574,7 +574,7 @@ export class ActivityController {
       }
 
       totalAmount += dbEvent.Price;
-      const participantId = await this.utilityService.generateParticipantId(dbEvent.Id);
+      const participantId = await this.utilityService.generateParticipantId(dbEvent.Id, student.Id);
 
       await this.prismaService.competitionParticipant.create({
         data: {

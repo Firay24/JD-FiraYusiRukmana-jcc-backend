@@ -6,6 +6,7 @@ export class AuthDto {
   email?: string | null;
   roleId?: string;
   birthdate?: number;
+  birthplace?: string;
   phoneNumber?: string;
   gender?: boolean;
 }

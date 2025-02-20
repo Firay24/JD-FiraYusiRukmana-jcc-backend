@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -7,6 +7,9 @@ import { UtilityService } from 'src/services/utility.service';
 import { EventSaveDto } from 'src/types/controller/event/event.dto';
 import { Request } from 'express';
 import { StageType } from '@prisma/client';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { PdfServiceController } from '../pdf-service/pdf-service.controller';
 
 @Controller()
 @UseGuards(RolesGuard)
@@ -14,6 +17,7 @@ export class EventController {
   constructor(
     private prismaService: PrismaService,
     private utilityService: UtilityService,
+    private pdfService: PdfServiceController,
   ) {}
 
   // #region search
@@ -234,4 +238,23 @@ export class EventController {
     });
   }
   // #endRegion
+  // #region pdf
+  @Post('upload')
+  @Roles([Role.SUPERADMIN, Role.ADMIN])
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './student_pdfs',
+        filename: (req, file, cb) => {
+          const filename = `${Date.now()}-${file.originalname}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  async uploadPdf(@UploadedFile() file: Express.Multer.File) {
+    await this.pdfService.processPdf(file.path);
+    return { message: 'PDF berhasil diproses' };
+  }
+  // #endregion
 }
