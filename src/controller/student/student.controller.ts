@@ -103,10 +103,19 @@ export class StudentController {
 
     const studentId = dbStudent ? dbStudent.Id : this.utilityService.generateUuid();
 
+    let idMember: string;
+    if (dbStudent) {
+      idMember = dbStudent.IdMember;
+    } else {
+      const studentCount = await this.prismaService.student.count();
+      idMember = (studentCount + 1).toString();
+    }
+
     const student = await this.prismaService.student.upsert({
       where: { Id: studentId },
       update: {
         Id: studentId,
+        IdMember: idMember,
         Address: body.address,
         Stage: body.stage,
         Class: body.class,
@@ -120,6 +129,7 @@ export class StudentController {
       },
       create: {
         Id: studentId,
+        IdMember: idMember,
         Address: body.address,
         Stage: body.stage,
         Class: body.class,

@@ -70,11 +70,27 @@ export class UtilityService {
     return Math.floor(date.getTime() / 1000);
   }
 
-  public async generateParticipantId(competitionId: string): Promise<string> {
+  public async generateParticipantId(competitionId: string, studentId: string): Promise<string> {
     const competition = await this.prismaService.competition.findUnique({
       where: { Id: competitionId },
       include: { Season: true, Region: true, Subject: true },
     });
+
+    const student = await this.prismaService.student.findUnique({
+      where: { Id: studentId },
+    });
+
+    let codeClass = '0';
+    if (student.Stage.toLowerCase() === 'sd') {
+      codeClass = student.Class;
+    } else if (student.Stage.toLowerCase() === 'smp') {
+      const smpClassMap: Record<string, string> = {
+        '1': '7',
+        '2': '8',
+        '3': '9',
+      };
+      codeClass = smpClassMap[student.Class] || '7';
+    }
 
     if (!competition) throw new Error('Competition not found');
     const seasonCode = competition.Season.Name.substring(0, 1);
@@ -97,7 +113,7 @@ export class UtilityService {
     });
 
     const participantNumber = (count + 1).toString().padStart(4, '0');
-    return `${seasonCode}${regionCode}${subjectCode}-${participantNumber}`;
+    return `${subjectCode}${codeClass}-${participantNumber}-${seasonCode}${regionCode}`;
   }
 
   public generateId() {

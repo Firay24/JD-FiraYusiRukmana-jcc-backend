@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { AuthModule } from './controller/auth/auth.module';
 import { GlobalModule } from './controller/global/global.module';
@@ -16,8 +17,14 @@ import { RoleModule } from './controller/role/role.module';
 import { SchoolModule } from './controller/school/school.module';
 import { SubjectModule } from './controller/subject/subject.module';
 
+import { join } from 'path';
+
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'student_pdfs'),
+      serveRoot: 'files',
+    }),
     // Module
     ConfigModule.forRoot({
       isGlobal: true, // Make the configuration module global
