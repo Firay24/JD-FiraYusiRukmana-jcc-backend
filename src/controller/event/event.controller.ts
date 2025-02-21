@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -10,6 +10,9 @@ import { StageType } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PdfServiceController } from '../pdf-service/pdf-service.controller';
+import * as path from 'path';
+import * as fs from 'fs';
+import { Response } from 'express';
 
 @Controller()
 @UseGuards(RolesGuard)
@@ -239,12 +242,12 @@ export class EventController {
   }
   // #endRegion
   // #region pdf
-  @Post('upload')
+  @Post('upload/:competitionId')
   @Roles([Role.SUPERADMIN, Role.ADMIN])
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './student_pdfs',
+        destination: './students_pdfs',
         filename: (req, file, cb) => {
           const filename = `${Date.now()}-${file.originalname}`;
           cb(null, filename);
@@ -252,9 +255,36 @@ export class EventController {
       }),
     }),
   )
-  async uploadPdf(@UploadedFile() file: Express.Multer.File) {
-    await this.pdfService.processPdf(file.path);
-    return { message: 'PDF berhasil diproses' };
+  async uploadPdf(@UploadedFile() file: Express.Multer.File, @Param('competitionId') competitionId: string) {
+    await this.pdfService.processPdf(file.path, competitionId);
+    return { message: 'PDF successfully' };
   }
   // #endregion
+
+  // #region getpdf
+  @Get('getpdf/:competitionId/:filename')
+  async getPdf(@Param('competitionId') competitionId: string, @Param('filename') filename: string, @Res() res: Response) {
+    // Ambil data kompetisi untuk mendapatkan nama folder
+    const competition = await this.prismaService.competition.findUnique({
+      where: { Id: competitionId },
+      select: { Subject: true, Stage: true, Level: true },
+    });
+
+    if (!competition) {
+      return res.status(404).send('Competition not found');
+    }
+
+    // Buat nama folder berdasarkan subject-stage-level
+    const folderName = `${competition.Subject.Name}-${competition.Stage}-${competition.Level}`;
+    const filePath = path.join(process.cwd(), 'students_pdfs', folderName, filename);
+
+    // Cek apakah file ada di path yang benar
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    } else {
+      return res.status(404).send('File not found');
+    }
+  }
+
+  /// #endregion
 }
