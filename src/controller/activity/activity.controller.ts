@@ -118,6 +118,76 @@ export class ActivityController {
   }
   // #endregion
 
+  // #region list by idCompetition
+  @Get('participant')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async listAllbtCompetition(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('idCompetition') idCompetition: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    limit = Math.max(1, Math.min(limit, 100));
+    const skip = (page - 1) * limit;
+
+    // Hitung total items berdasarkan idCompetition jika ada
+    const totalItems = await this.prismaService.competitionParticipant.count({
+      where: { CompetitionId: idCompetition },
+    });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      skip,
+      take: limit,
+      where: { CompetitionId: idCompetition },
+      orderBy: {
+        Score: 'desc',
+      },
+      include: {
+        Competition: { include: { Subject: true, Season: true, Region: true } },
+        Payment: true,
+        Student: {
+          include: {
+            User: true,
+            School: true,
+          },
+        },
+      },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        data: dbActivity.map((activity) => ({
+          score: activity.Score,
+          name: activity.Student.User.Name,
+          school: activity.Student.School.Name,
+          class: activity.Student.Class,
+          stage: activity.Student.Stage,
+          regional: activity.Competition.Region.Name,
+        })),
+      },
+    });
+  }
+
+  // #endregion
+
   // #region list all
   @Get('list/all')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
@@ -221,7 +291,10 @@ export class ActivityController {
         data: dbActivity.map((activity) => ({
           id: activity.Id,
           statusPayment: activity.Payment?.Status,
+          score: activity.Score,
+          pathAnswer: activity.PathAnswer,
           competition: {
+            id: activity.Competition.Id,
             name: activity.Competition.Name,
             description: activity.Competition.Description,
             date: activity.Competition.Date,
@@ -314,7 +387,7 @@ export class ActivityController {
     });
 
     const competitionParticipantId = dbCompetitionParticipant ? dbCompetitionParticipant.Id : this.utilityService.generateUuid();
-    const participantId = await this.utilityService.generateParticipantId(body.competitionId);
+    const participantId = await this.utilityService.generateParticipantId(body.competitionId, body.studentId);
 
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
@@ -427,7 +500,7 @@ export class ActivityController {
 
     const createdParticipants = [];
     for (const competitionId of body.competitionId) {
-      const participantId = await this.utilityService.generateParticipantId(competitionId);
+      const participantId = await this.utilityService.generateParticipantId(competitionId, body.studentId);
 
       const competition = await this.prismaService.competitionParticipant.create({
         data: {
@@ -574,7 +647,7 @@ export class ActivityController {
       }
 
       totalAmount += dbEvent.Price;
-      const participantId = await this.utilityService.generateParticipantId(dbEvent.Id);
+      const participantId = await this.utilityService.generateParticipantId(dbEvent.Id, student.Id);
 
       await this.prismaService.competitionParticipant.create({
         data: {

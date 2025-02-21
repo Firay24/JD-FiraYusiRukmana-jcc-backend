@@ -86,9 +86,10 @@ export class AuthController {
   @Post('sign-up')
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() body: AuthDto) {
-    let { username, password, email, name, roleId, birthdate, gender, phoneNumber } = body;
+    let { username, password, email, name, roleId, birthdate, gender, phoneNumber, birthplace } = body;
     username = username.toLowerCase().trim();
     name = name.trim();
+    birthplace = birthplace ? birthplace.trim() : '';
     email = email ? email.trim() : null;
     password = password ? password.trim() : this.utilityService.generateRandomPassword();
     roleId = roleId.trim();
@@ -129,6 +130,7 @@ export class AuthController {
         Password: hashedPassword,
         RoleId: roleId,
         Birthdate: birthdate,
+        BirthPlace: birthplace,
         Gender: gender,
         PhoneNumber: phoneNumber,
       },

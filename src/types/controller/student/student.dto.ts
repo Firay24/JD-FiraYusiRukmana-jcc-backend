@@ -2,6 +2,7 @@ import { StageType } from '@prisma/client';
 
 export class StudentSaveDto {
   id?: string;
+  idMember?: string;
   address: string;
   stage: StageType;
   class: string;
