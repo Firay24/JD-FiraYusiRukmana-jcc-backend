@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StageType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -6,10 +6,11 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 // import * as bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+// import { users } from '../src/data/user';
 // import { schools } from '../src/data/school';
-import { kisikisi } from '../src/data/kisi-kisi';
+// import { kisikisi } from '../src/data/kisi-kisi';
 // import { regionsOfBwi } from '../src/data/region';
-// import { competitions } from '../src/data/competition';
+import { competitions } from '../src/data/competition';
 
 dayjs.extend(utc);
 
@@ -65,18 +66,32 @@ async function main() {
   // #endregion
   // #region User
   // await prisma.user.createMany({
+  //   skipDuplicates: false,
+  //   data: users.map((user) => ({
+  //     Id: generateUuid(),
+  //     Name: user.name,
+  //     Username: user.username,
+  //     Email: user.email,
+  //     Password: hashPassword(user.password),
+  //     RoleId: user.roleId,
+  //     Birthdate: user.birthdate,
+  //     PhoneNumber: user.phoneNumber,
+  //     Gender: user.gender,
+  //   })),
+  // });
+  // await prisma.user.createMany({
   //   skipDuplicates: true,
   //   data: [
   //     {
-  //       Id: generateUuid(),
-  //       Name: 'Superadmin',
-  //       Username: 'superadmin',
-  //       Email: 'superadmin@mail.com',
-  //       Password: hashPassword('junior12345'),
-  //       RoleId: roles.find((a) => a.Name === RoleType.SUPERADMIN)?.Id,
-  //       Birthdate: 980955648,
-  //       PhoneNumber: '08123456789',
-  //       Gender: true,
+  // Id: generateUuid(),
+  // Name: 'Superadmin',
+  // Username: 'superadmin',
+  // Email: 'superadmin@mail.com',
+  // Password: hashPassword('junior12345'),
+  // RoleId: roles.find((a) => a.Name === RoleType.SUPERADMIN)?.Id,
+  // Birthdate: 980955648,
+  // PhoneNumber: '08123456789',
+  // Gender: true,
   //     },
   //     {
   //       Id: generateUuid(),
@@ -173,16 +188,16 @@ async function main() {
   // });
   // #endregion
   // #region Kisi
-  await prisma.kisi.createMany({
-    skipDuplicates: true,
-    data: kisikisi.map((kisi) => ({
-      Id: generateUuid(),
-      DateCreate: new Date(),
-      DateUpdate: new Date(),
-      Content: kisi.content,
-      CompetitionId: kisi.competitionId,
-    })),
-  });
+  // await prisma.kisi.createMany({
+  //   skipDuplicates: true,
+  //   data: kisikisi.map((kisi) => ({
+  //     Id: generateUuid(),
+  //     DateCreate: new Date(),
+  //     DateUpdate: new Date(),
+  //     Content: kisi.content,
+  //     CompetitionId: kisi.competitionId,
+  //   })),
+  // });
   // #endregion
   // #region Region
   // await prisma.region.createMany({
@@ -198,26 +213,26 @@ async function main() {
   // });
   // #endregion
   // #region Competition
-  // await prisma.competition.createMany({
-  //   skipDuplicates: true,
-  //   data: competitions.map((competition) => ({
-  //     Id: generateUuid(),
-  //     DateCreate: new Date(),
-  //     DateUpdate: new Date(),
-  //     Name: competition.name,
-  //     Description: competition.description,
-  //     Date: competition.date,
-  //     Level: competition.level,
-  //     Stage: competition.stage as StageType,
-  //     Price: competition.price,
-  //     RegionId: competition.regionId,
-  //     Location: competition.location,
-  //     SeasonId: competition.seasonId,
-  //     SubjectId: competition.subjectId,
-  //     CodePackage: competition.codePackage,
-  //     PathAnswer: competition.pathAnswer,
-  //   })),
-  // });
+  await prisma.competition.createMany({
+    skipDuplicates: true,
+    data: competitions.map((competition) => ({
+      Id: generateUuid(),
+      DateCreate: new Date(),
+      DateUpdate: new Date(),
+      Name: competition.name,
+      Description: competition.description,
+      Date: competition.date,
+      Level: competition.level,
+      Stage: competition.stage as StageType,
+      Price: competition.price,
+      RegionId: competition.regionId,
+      Location: competition.location,
+      SeasonId: competition.seasonId,
+      SubjectId: competition.subjectId,
+      CodePackage: competition.codePackage,
+      PathAnswer: competition.pathAnswer,
+    })),
+  });
 }
 main()
   .then(async () => {

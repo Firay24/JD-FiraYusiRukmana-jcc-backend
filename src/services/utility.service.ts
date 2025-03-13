@@ -93,12 +93,12 @@ export class UtilityService {
     }
 
     if (!competition) throw new Error('Competition not found');
-    const seasonCode = competition.Season.Name.substring(0, 1);
-    const regionCode = competition.Region.Region.toString().slice(-2);
+    // const seasonCode = competition.Season.Name.substring(0, 1);
+    const regionCode = competition.Region.Region.toString().padStart(2, '0');
     const subjectMap: Record<string, string> = {
       matematika: 'M',
-      ipa: 'A',
-      ips: 'S',
+      ipa: 'S',
+      ips: 'I',
       'bahasa inggris': 'B',
     };
     const subjectCode = subjectMap[competition.Subject.Name] || 'X';
@@ -106,14 +106,13 @@ export class UtilityService {
     const count = await this.prismaService.competitionParticipant.count({
       where: {
         Competition: {
-          SeasonId: competition.SeasonId,
-          RegionId: competition.RegionId,
+          Id: competitionId,
         },
       },
     });
 
     const participantNumber = (count + 1).toString().padStart(4, '0');
-    return `${subjectCode}${codeClass}-${participantNumber}-${seasonCode}${regionCode}`;
+    return `${subjectCode}${codeClass}-${regionCode}-${participantNumber}`;
   }
 
   public generateId() {

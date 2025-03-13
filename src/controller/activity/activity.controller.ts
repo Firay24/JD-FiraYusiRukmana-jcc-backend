@@ -368,14 +368,14 @@ export class ActivityController {
           Invoice: this.utilityService.generateInvoice(),
           Date: this.utilityService.getEpoch(new Date()),
           Amount: dbEvent.Price,
-          Status: 'PENDING',
+          Status: 'COMPLETED',
         },
       });
       await this.prismaService.paymentStatusHistory.create({
         data: {
           Id: this.utilityService.generateUuid(),
           PaymentId: payment.Id,
-          Status: 'PENDING',
+          Status: 'COMPLETED',
           Date: this.utilityService.getEpoch(new Date()),
         },
       });
@@ -422,7 +422,7 @@ export class ActivityController {
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: `Success ${body.id ? 'Update' : 'Create'} Competition`,
-      data: { id: competition.Id },
+      data: { id: competition.Id, participantId: participantId },
     });
   }
   // #endregion

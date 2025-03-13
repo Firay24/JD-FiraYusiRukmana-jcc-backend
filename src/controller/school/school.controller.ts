@@ -16,7 +16,7 @@ export class SchoolController {
     private readonly utilityService: UtilityService,
   ) {}
 
-  // #region detail
+  // #region save
   @Post('save')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.SUPERADMIN])
   async save(@Req() request: Request, @Body() body: SchoolSaveDto) {
