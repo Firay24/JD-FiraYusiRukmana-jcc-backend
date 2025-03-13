@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -17,7 +17,7 @@ export class SubjectController {
   // #region list
   @Get('list')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
-  async list(@Req() request: Request) {
+  async list(@Req() request: Request, @Query('studentId') studentId: string, @Query('seasonId') seasonId: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -33,7 +33,26 @@ export class SubjectController {
       );
     }
 
-    const dbSubject = await this.prismaService.subject.findMany();
+    let followedSubjectIds: string[] = [];
+
+    if (studentId && seasonId) {
+      const competitionFollowed = await this.prismaService.competition.findMany({
+        where: {
+          SeasonId: seasonId,
+          CompetitionParticipant: {
+            some: {
+              StudentId: studentId,
+            },
+          },
+        },
+      });
+
+      followedSubjectIds = competitionFollowed.map((comp) => comp.SubjectId);
+    }
+
+    const dbSubject = await this.prismaService.subject.findMany({
+      where: followedSubjectIds.length > 0 ? { Id: { notIn: followedSubjectIds } } : {},
+    });
 
     return this.utilityService.globalResponse({
       statusCode: 200,

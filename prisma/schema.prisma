@@ -44,8 +44,8 @@ model Student {
   Class                  String
   SchoolId               String
   NIK                    String
-  FatherName             String
-  MotherName             String
+  FatherName             String?
+  MotherName             String?
   IdUser                 String
   PhotoPath              String?
   Poin                   Int                      @default(0)

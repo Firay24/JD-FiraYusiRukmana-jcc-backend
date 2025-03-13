@@ -97,6 +97,19 @@ export class StudentController {
       );
     }
 
+    const userExcist = await this.prismaService.user.findFirst({
+      where: { Id: body.idUser ?? '' },
+    });
+
+    if (!userExcist) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
     const dbStudent = await this.prismaService.student.findFirst({
       where: { Id: body.id ?? '' },
     });
@@ -134,19 +147,27 @@ export class StudentController {
         Stage: body.stage,
         Class: body.class,
         NIK: body.nik,
-        SchoolId: body.schoolId,
         FatherName: body.fatherName,
         MotherName: body.motherName,
-        IdUser: body.idUser,
         PhotoPath: body.photoPath,
         Poin: body.poin,
+        User: {
+          connect: {
+            Id: body.idUser,
+          },
+        },
+        School: {
+          connect: {
+            Id: body.schoolId,
+          },
+        },
       },
     });
 
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: `Success ${body.id ? 'Update' : 'Create'} Student`,
-      data: { id: student.Id },
+      data: { id: student.Id, idMember: student.IdMember },
     });
   }
   //#endregion
