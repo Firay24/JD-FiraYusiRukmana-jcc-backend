@@ -42,7 +42,7 @@ export class PaymentController {
       throw new BadRequestException(
         this.utilityService.globalResponse({
           statusCode: 400,
-          message: 'Student not found',
+          message: 'Payment not found',
         }),
       );
     }
