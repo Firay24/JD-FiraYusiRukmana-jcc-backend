@@ -29,9 +29,10 @@ model User {
   Gender      Boolean
   Email       String?       @unique
   Status      ActiveStatus  @default(ACTIVE)
+  Achievement Achievement[]
   Student     Student[]
   Role        Role          @relation(fields: [RoleId], references: [Id])
-  Achievement Achievement[]
+  Payment     Payment[]
 }
 
 model Student {
@@ -51,8 +52,8 @@ model Student {
   Poin                   Int                      @default(0)
   CompetitionParticipant CompetitionParticipant[]
   User                   User                     @relation(fields: [IdUser], references: [Id])
-  Subscription           Subscription[]
   School                 School                   @relation(fields: [SchoolId], references: [Id])
+  Subscription           Subscription[]
 }
 
 model Achievement {
@@ -63,8 +64,8 @@ model Achievement {
   Category      String
   Describe      String?
   CompetitionId String
-  User          User        @relation(fields: [UserId], references: [Id])
   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  User          User        @relation(fields: [UserId], references: [Id])
 }
 
 model Season {
@@ -101,16 +102,16 @@ model Competition {
   SubjectId              String
   CodePackage            String?
   PathAnswer             String?
+  regionId               String?
+  Achievement            Achievement[]
   Region                 Region                   @relation(fields: [RegionId], references: [Id])
   Season                 Season                   @relation(fields: [SeasonId], references: [Id])
   Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
   CompetitionParticipant CompetitionParticipant[]
   CompetitionRoom        CompetitionRoom[]
   Kisi                   Kisi[]
-  Tryout                 Tryout[]
   Subscription           Subscription[]
-  Achievement            Achievement[]
-  regionId               String?
+  Tryout                 Tryout[]
 }
 
 model Subscription {
@@ -122,31 +123,9 @@ model Subscription {
   Status        Boolean      @default(true)
   StudentId     String
   CompetitionId String?
-  Student       Student      @relation(fields: [StudentId], references: [Id])
   Competition   Competition? @relation(fields: [CompetitionId], references: [Id])
+  Student       Student      @relation(fields: [StudentId], references: [Id])
 }
-
-// model Discussion {
-//   Id            String      @id
-//   DateCreate    DateTime    @default(now())
-//   DateUpdate    DateTime?   @updatedAt
-//   Name          String
-//   CompetitionId String
-//   FilePath      String
-//   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
-// }
-
-// model Exam {
-//   Id            String      @id
-//   DateCreate    DateTime    @default(now())
-//   DateUpdate    DateTime?   @updatedAt
-//   CompetitionId String
-//   Correct       Int
-//   Incorrect     Int
-//   Score         Int
-//   QuestionCode  String
-//   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
-// }
 
 model Region {
   Id           String        @id
@@ -247,6 +226,8 @@ model Payment {
   Invoice                String
   Date                   Int
   Amount                 Int
+  UserId                 String?                  @default("ae7317bda7b54cbc8262")
+  User                   User?                    @relation(fields: [UserId], references: [Id])
   Status                 PaymentType
   CompetitionParticipant CompetitionParticipant[]
   PaymentStatusHistory   PaymentStatusHistory[]
