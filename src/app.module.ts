@@ -16,6 +16,7 @@ import { PaymentModule } from './controller/payment/payment.module';
 import { RoleModule } from './controller/role/role.module';
 import { SchoolModule } from './controller/school/school.module';
 import { SubjectModule } from './controller/subject/subject.module';
+import { RegionalModule } from './controller/regional/regional.module';
 
 import { join } from 'path';
 
@@ -72,6 +73,10 @@ import { join } from 'path';
         module: SubjectModule,
       },
       {
+        path: 'v1/regional',
+        module: RegionalModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -95,6 +100,7 @@ import { join } from 'path';
     RoleModule,
     SchoolModule,
     SubjectModule,
+    RegionalModule,
   ],
 })
 export class AppModule {}
