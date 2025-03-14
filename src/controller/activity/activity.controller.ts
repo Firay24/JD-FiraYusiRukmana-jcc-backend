@@ -191,7 +191,7 @@ export class ActivityController {
   // #region list all
   @Get('list/all')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
-  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20) {
+  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -210,13 +210,31 @@ export class ActivityController {
     limit = Math.max(1, Math.min(limit, 100));
 
     const skip = (page - 1) * limit;
-    const totalItems = await this.prismaService.competition.count();
+    const totalItems = await this.prismaService.competitionParticipant.count({
+      where: {
+        Competition: {
+          SeasonId: seasonId || undefined,
+          RegionId: regionId || undefined,
+          Stage: (stage as StageType) || undefined,
+          Level: parseInt(level) || undefined,
+          SubjectId: subjectId || undefined,
+        },
+      },
+    });
     const totalPages = Math.ceil(totalItems / limit);
 
     const dbActivity = await this.prismaService.competitionParticipant.findMany({
       skip,
       take: limit,
-      include: { Payment: true, Student: { include: { User: true, School: true } } },
+      where: {
+        Competition: {
+          RegionId: regionId || undefined,
+          Stage: (stage as StageType) || ('TK' as StageType),
+          Level: parseInt(level) || undefined,
+          SubjectId: subjectId || undefined,
+        },
+      },
+      include: { Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
     });
 
     return this.utilityService.globalResponse({
@@ -230,13 +248,35 @@ export class ActivityController {
         data: dbActivity.map((activity) => ({
           id: activity.Id,
           name: activity.Student.User.Name,
+          idMember: activity.Student.IdMember,
           idParticipant: activity.ParticipantId,
           school: activity.Student.School.Name,
           class: activity.Student.Class,
           stage: activity.Student.Stage,
           phoneNumber: activity.Student.User.PhoneNumber,
           nik: activity.Student.NIK,
-          payment: activity.Payment.Status,
+          payment: {
+            id: activity.PaymentId,
+            status: activity.Payment.Status,
+          },
+          competition: {
+            id: activity.CompetitionId,
+            name: activity.Competition.Name,
+            subject: {
+              id: activity.Competition.SubjectId,
+              name: activity.Competition.Subject.Name,
+            },
+            season: {
+              id: activity.Competition.SeasonId,
+              name: activity.Competition.Season.Name,
+            },
+            region: {
+              id: activity.Competition.RegionId,
+              name: activity.Competition.Region.Name,
+            },
+            date: activity.Competition.Date,
+            location: activity.Competition.Location,
+          },
         })),
       },
     });
