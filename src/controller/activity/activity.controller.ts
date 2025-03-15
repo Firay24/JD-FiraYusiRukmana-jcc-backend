@@ -589,7 +589,22 @@ export class ActivityController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Body('schoolId') schoolId: string) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() request: Request, @Body('schoolId') schoolId: string, @Body('seasonId') seasonId: string, @Body('regionId') regionId: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -606,6 +621,7 @@ export class ActivityController {
         Id: this.utilityService.generateUuid(),
         Invoice: this.utilityService.generateInvoice(),
         Date: this.utilityService.getEpoch(new Date()),
+        UserId: user.id,
         Amount: 0,
         Status: 'PENDING',
       },
@@ -620,7 +636,11 @@ export class ActivityController {
       },
     });
 
-    for (const row of data) {
+    const roleIdParticipant = await this.prismaService.role.findFirst({
+      where: { Name: 'PARTICIPANT' },
+    });
+
+    for (const [index, row] of data.entries()) {
       let student = await this.prismaService.student.findFirst({
         where: { NIK: row.nik },
       });
@@ -649,7 +669,7 @@ export class ActivityController {
             Name: row.name,
             Username: row.username,
             Password: hashedPassword,
-            RoleId: '67cb3b008ca0499c84fc',
+            RoleId: roleIdParticipant.Id,
             Birthdate: this.utilityService.getEpoch(new Date(row.birthdate)),
             Gender: row.gender === 'Perempuan' ? false : true,
             PhoneNumber: row.phoneNumber,
@@ -676,7 +696,7 @@ export class ActivityController {
       });
 
       const dbEvent = await this.prismaService.competition.findFirst({
-        where: { Stage: row.stage as StageType, Level: parseInt(row.level, 10), SubjectId: subject.Id },
+        where: { Stage: row.stage as StageType, Level: parseInt(row.level, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
       });
 
       if (!dbEvent) {
@@ -686,7 +706,11 @@ export class ActivityController {
         });
       }
 
-      totalAmount += dbEvent.Price;
+      if (index === 10) {
+        totalAmount += 0;
+      } else {
+        totalAmount += dbEvent.Price;
+      }
       const participantId = await this.utilityService.generateParticipantId(dbEvent.Id, student.Id);
 
       await this.prismaService.competitionParticipant.create({
