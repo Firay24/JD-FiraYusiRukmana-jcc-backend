@@ -238,6 +238,11 @@ export class ActivityController {
       include: { Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
     });
 
+    dbActivity.sort((a, b) => {
+      const priority = { CONFIRMED: 1, PENDING: 2, COMPLETED: 3 };
+      return (priority[a.Payment.Status] || 99) - (priority[b.Payment.Status] || 4);
+    });
+
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Success',
