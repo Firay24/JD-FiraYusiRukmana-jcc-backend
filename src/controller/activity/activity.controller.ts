@@ -79,6 +79,7 @@ export class ActivityController {
       data: {
         id: dbActivity.Id,
         participantId: dbActivity.ParticipantId,
+        idjcc: dbActivity.Student.IdMember,
         paymentId: dbActivity.PaymentId,
         paymentDate: dbActivity.Payment.Date,
         invoice: dbActivity.Payment.Invoice,
@@ -508,6 +509,7 @@ export class ActivityController {
       );
     }
 
+    let paymentId: string | undefined;
     const existingParticipants = await this.prismaService.competitionParticipant.findMany({
       where: {
         StudentId: body.studentId,
@@ -516,7 +518,10 @@ export class ActivityController {
       include: { Payment: true },
     });
 
-    let paymentId = existingParticipants.length > 0 ? existingParticipants[0].Payment?.Id : undefined;
+    if (existingParticipants.length > 0) {
+      paymentId = existingParticipants[0].Payment?.Id;
+    }
+
     if (!paymentId) {
       const payment = await this.prismaService.payment.create({
         data: {

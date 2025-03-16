@@ -26,7 +26,7 @@ export class EventController {
   // #region search
   @Get('search')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])
-  async search(@Req() request: Request, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string) {
+  async search(@Req() request: Request, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string, @Query('region') region: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -42,8 +42,12 @@ export class EventController {
       );
     }
 
+    const dbRegion = await this.prismaService.region.findFirst({
+      where: { Region: parseInt(region, 10) },
+    });
+
     const dbEvent = await this.prismaService.competition.findFirst({
-      where: { Stage: stage as StageType, Level: parseInt(level, 10), SubjectId: subjectId },
+      where: { Stage: stage as StageType, Level: parseInt(level, 10), SubjectId: subjectId, RegionId: dbRegion.Id },
     });
 
     if (!dbEvent) {
