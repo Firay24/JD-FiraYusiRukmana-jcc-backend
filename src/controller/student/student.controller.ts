@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { Roles } from 'src/guard/roles/roles.decorator';
@@ -73,6 +73,58 @@ export class StudentController {
         poin: dbStudent.Poin,
         totalActivity: dbStudent.CompetitionParticipant.length,
         avarageScore: averageScore._avg.Score,
+      },
+    });
+  }
+  // #endregion
+
+  // #region student by payment
+  @Get('payment/:id')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async studentByPayment(@Req() request: Request, @Param('id') id: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbParticipant = await this.prismaService.payment.findFirst({
+      where: { Id: id },
+      include: { CompetitionParticipant: { include: { Student: { include: { User: true } }, Competition: { include: { Subject: true, Season: true, Region: true } } } } },
+    });
+
+    if (!dbParticipant) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Participant not found',
+        }),
+      );
+    }
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        regional: dbParticipant.CompetitionParticipant[0].Competition.Region.Name,
+        participant: dbParticipant.CompetitionParticipant.map((participant) => {
+          return {
+            name: participant.Student.User.Name,
+            username: participant.Student.User.Username,
+            class: participant.Student.Class,
+            stage: participant.Student.Stage,
+            subject: participant.Competition.Subject.Name,
+          };
+        }),
       },
     });
   }

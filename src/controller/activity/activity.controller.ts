@@ -413,6 +413,7 @@ export class ActivityController {
           Id: this.utilityService.generateUuid(),
           Invoice: this.utilityService.generateInvoice(),
           Date: this.utilityService.getEpoch(new Date()),
+          UserId: user.id,
           Amount: dbEvent.Price,
           Status: 'COMPLETED',
         },
@@ -533,6 +534,7 @@ export class ActivityController {
           Id: this.utilityService.generateUuid(),
           Invoice: this.utilityService.generateInvoice(),
           Date: this.utilityService.getEpoch(new Date()),
+          UserId: user.id,
           Amount: body.amount,
           Status: 'PENDING',
         },
@@ -694,8 +696,8 @@ export class ActivityController {
             Class: row.class.toString(),
             SchoolId: schoolId,
             NIK: row.nik,
-            FatherName: row.fatherName,
-            MotherName: row.motherName,
+            FatherName: '',
+            MotherName: '',
             IdUser: user.Id,
           },
         });
@@ -706,7 +708,7 @@ export class ActivityController {
       });
 
       const dbEvent = await this.prismaService.competition.findFirst({
-        where: { Stage: row.stage as StageType, Level: parseInt(row.level, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
+        where: { Stage: row.stage as StageType, Level: parseInt(row.class, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
       });
 
       if (!dbEvent) {
