@@ -75,6 +75,44 @@ export class PaymentController {
   }
   // #endregion
 
+  // #region get kolektif
+  @Get('kolektif')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async getAllByKolektif(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbPayment = await this.prismaService.payment.findMany({
+      where: { UserId: user.id },
+      include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } }, CompetitionParticipant: { include: { Competition: { include: { Season: true, Subject: true, Region: true } } } } },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbPayment.map((payment) => ({
+        id: payment.Id,
+        invoice: payment.Invoice,
+        date: payment.Date,
+        amount: payment.Amount,
+        status: payment.Status,
+      })),
+    });
+  }
+  // #endregion
+
   // #region get by id
   @Get('get/:id')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
