@@ -134,7 +134,7 @@ export class PaymentController {
 
     const dbPayment = await this.prismaService.payment.findFirst({
       where: { Id: id },
-      include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } }, CompetitionParticipant: { include: { Competition: { include: { Season: true, Subject: true, Region: true } } } } },
+      include: { PaymentStatusHistory: { orderBy: { Date: 'desc' } }, CompetitionParticipant: { include: { Competition: { include: { Season: true, Subject: true, Region: true } }, Student: { include: { User: true } } } } },
     });
 
     if (!dbPayment) {
@@ -164,6 +164,12 @@ export class PaymentController {
           price: participant.Competition?.Price ?? 0,
           stage: participant.Competition.Stage,
           level: participant.Competition.Level,
+          student: {
+            name: participant.Student.User.Name,
+            username: participant.Student.User.Username,
+            stage: participant.Student.Stage,
+            class: participant.Student.Class,
+          },
           season: {
             id: participant.Competition?.Season?.Id ?? null,
             name: participant.Competition?.Season?.Name ?? '',
