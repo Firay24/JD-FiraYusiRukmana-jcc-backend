@@ -264,6 +264,7 @@ export class ActivityController {
           payment: {
             id: activity.PaymentId,
             status: activity.Payment.Status,
+            invoice: activity.Payment.Invoice,
           },
           competition: {
             id: activity.CompetitionId,
@@ -751,6 +752,7 @@ export class ActivityController {
     return {
       message: 'Upload sukses',
       data: {
+        id: payment.Id,
         totalParticipant: data.length,
         amount: totalAmount,
       },
