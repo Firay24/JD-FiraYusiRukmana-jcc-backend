@@ -189,7 +189,7 @@ export class ActivityController {
   // #region list all
   @Get('list/all')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
-  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string) {
+  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string, @Query('search') search: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -210,6 +210,7 @@ export class ActivityController {
     const skip = (page - 1) * limit;
     const totalItems = await this.prismaService.competitionParticipant.count({
       where: {
+        OR: [{ Student: { User: { Name: { contains: search, mode: 'insensitive' } } } }, { Payment: { Invoice: { contains: search, mode: 'insensitive' } } }, { Student: { School: { Name: { contains: search, mode: 'insensitive' } } } }],
         Competition: {
           SeasonId: seasonId || undefined,
           RegionId: regionId || undefined,
@@ -225,9 +226,10 @@ export class ActivityController {
       skip,
       take: limit,
       where: {
+        OR: [{ Student: { User: { Name: { contains: search, mode: 'insensitive' } } } }, { Payment: { Invoice: { contains: search, mode: 'insensitive' } } }, { Student: { School: { Name: { contains: search, mode: 'insensitive' } } } }],
         Competition: {
           RegionId: regionId || undefined,
-          Stage: (stage as StageType) || ('TK' as StageType),
+          Stage: (stage as StageType) || undefined,
           Level: parseInt(level) || undefined,
           SubjectId: subjectId || undefined,
         },
