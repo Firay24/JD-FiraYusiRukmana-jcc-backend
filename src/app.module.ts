@@ -17,6 +17,7 @@ import { RoleModule } from './controller/role/role.module';
 import { SchoolModule } from './controller/school/school.module';
 import { SubjectModule } from './controller/subject/subject.module';
 import { RegionalModule } from './controller/regional/regional.module';
+import { StatisticsModule } from './controller/statistics/statistics.module';
 
 import { join } from 'path';
 
@@ -77,6 +78,10 @@ import { join } from 'path';
         module: RegionalModule,
       },
       {
+        path: 'v1/statistics',
+        module: StatisticsModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -101,6 +106,7 @@ import { join } from 'path';
     SchoolModule,
     SubjectModule,
     RegionalModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}
