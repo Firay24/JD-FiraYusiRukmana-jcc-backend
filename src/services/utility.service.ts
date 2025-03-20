@@ -145,6 +145,13 @@ export class UtilityService {
     return noDashes.slice(0, 20);
   }
 
+  public calculatePrice(quantity: number, pricePerItem: number): number {
+    const multiplesOfEleven = Math.floor(quantity / 11) * 10;
+    const remainder = quantity % 11;
+
+    return (multiplesOfEleven + remainder) * pricePerItem;
+  }
+
   public validatePassword(password: string): string | null {
     // Regular expressions for password validation
     const minLength = 8;

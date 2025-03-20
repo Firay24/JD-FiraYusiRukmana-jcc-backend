@@ -14,20 +14,17 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StageType } from '@prisma/client';
 
 interface ExcelRow {
-  name: string;
+  nama: string;
   username: string;
   password: string;
-  gender: string;
-  phoneNumber: string;
-  address: string;
-  stage: string;
-  class: string;
+  jenisKelamin: string;
+  noHP: string;
+  alamat: string;
+  jenjang: string;
+  kelas: string;
   nik: string;
-  fatherName: string;
-  motherName: string;
-  level: string;
-  subject: string;
-  birthdate: string;
+  matpel: string;
+  tanggalLahir: string;
 }
 
 @Controller()
@@ -628,14 +625,15 @@ export class ActivityController {
     const data: ExcelRow[] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
     fs.unlinkSync(filePath);
 
-    let totalAmount = 0;
+    // let totalAmount = 0;
+    const calculatePrice = this.utilityService.calculatePrice(data.length, 70000);
     const payment = await this.prismaService.payment.create({
       data: {
         Id: this.utilityService.generateUuid(),
         Invoice: this.utilityService.generateInvoice(),
         Date: this.utilityService.getEpoch(new Date()),
         UserId: user.id,
-        Amount: 0,
+        Amount: calculatePrice,
         Status: 'PENDING',
       },
     });
@@ -653,7 +651,8 @@ export class ActivityController {
       where: { Name: 'PARTICIPANT' },
     });
 
-    for (const [index, row] of data.entries()) {
+    for (const row of data) {
+      let idMember: string;
       let student = await this.prismaService.student.findFirst({
         where: { NIK: row.nik },
       });
@@ -679,22 +678,26 @@ export class ActivityController {
         const user = await this.prismaService.user.create({
           data: {
             Id: this.utilityService.generateId(),
-            Name: row.name,
+            Name: row.nama,
             Username: row.username,
             Password: hashedPassword,
             RoleId: roleIdParticipant.Id,
-            Birthdate: this.utilityService.getEpoch(new Date(row.birthdate)),
-            Gender: row.gender === 'Perempuan' ? false : true,
-            PhoneNumber: row.phoneNumber,
+            Birthdate: this.utilityService.getEpoch(new Date(row.tanggalLahir)),
+            Gender: row.jenisKelamin === 'Perempuan' ? false : true,
+            PhoneNumber: row.noHP,
           },
         });
+
+        const studentCount = await this.prismaService.student.count();
+        idMember = (studentCount + 1).toString();
 
         student = await this.prismaService.student.create({
           data: {
             Id: this.utilityService.generateId(),
-            Address: row.address,
-            Stage: row.stage as StageType,
-            Class: row.class.toString(),
+            Address: row.alamat,
+            Stage: row.jenjang as StageType,
+            Class: row.kelas.toString(),
+            IdMember: idMember,
             SchoolId: schoolId,
             NIK: row.nik,
             FatherName: '',
@@ -705,25 +708,25 @@ export class ActivityController {
       }
 
       const subject = await this.prismaService.subject.findFirst({
-        where: { Name: row.subject },
+        where: { Name: row.matpel },
       });
 
       const dbEvent = await this.prismaService.competition.findFirst({
-        where: { Stage: row.stage as StageType, Level: parseInt(row.class, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
+        where: { Stage: row.jenjang as StageType, Level: parseInt(row.kelas, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
       });
 
       if (!dbEvent) {
         return this.utilityService.globalResponse({
           statusCode: 404,
-          message: `Competition not found for subject: ${row.subject}, stage: ${row.stage}, level: ${row.level}`,
+          message: `Competition not found for subject: ${row.matpel}, stage: ${row.jenjang}, level: ${row.kelas}`,
         });
       }
 
-      if (index === 10) {
-        totalAmount += 0;
-      } else {
-        totalAmount += dbEvent.Price;
-      }
+      // if (index === 10) {
+      //   totalAmount += 0;
+      // } else {
+      //   totalAmount += dbEvent.Price;
+      // }
       const participantId = await this.utilityService.generateParticipantId(dbEvent.Id, student.Id);
 
       await this.prismaService.competitionParticipant.create({
@@ -742,19 +745,19 @@ export class ActivityController {
       });
     }
 
-    await this.prismaService.payment.update({
-      where: { Id: payment.Id },
-      data: {
-        Amount: totalAmount,
-      },
-    });
+    // await this.prismaService.payment.update({
+    //   where: { Id: payment.Id },
+    //   data: {
+    //     Amount: totalAmount,
+    //   },
+    // });
 
     return {
       message: 'Upload sukses',
       data: {
         id: payment.Id,
         totalParticipant: data.length,
-        amount: totalAmount,
+        amount: calculatePrice,
       },
     };
   }
