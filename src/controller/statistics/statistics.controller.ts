@@ -48,6 +48,12 @@ export class StatisticsController {
       },
     });
 
+    const classLevels = {
+      TK: [1],
+      SD: [1, 2, 3, 4, 5, 6],
+      SMP: [1, 2, 3],
+    };
+
     // structure report
     const report = {};
     const totalPerStage = { TK: 0, SD: 0, SMP: 0 };
@@ -56,9 +62,32 @@ export class StatisticsController {
     let grandTotal = 0;
     const subjects = new Set<string>();
 
+    // 🔹 Inisialisasi report dengan kelas lengkap dan mata pelajaran unik
     competitionsDb.forEach((competition) => {
       const subjectName = competition.Subject.Name;
       subjects.add(subjectName);
+    });
+
+    Array.from(subjects).forEach((subject) => {
+      totalPerSubject[subject] = 0;
+    });
+
+    Object.keys(classLevels).forEach((stage) => {
+      report[stage] = {};
+      totalPerLevel[stage] = {};
+
+      classLevels[stage].forEach((studentClass) => {
+        report[stage][studentClass] = {};
+        totalPerLevel[stage][studentClass] = 0;
+
+        Array.from(subjects).forEach((subject) => {
+          report[stage][studentClass][subject] = 0;
+        });
+      });
+    });
+
+    competitionsDb.forEach((competition) => {
+      const subjectName = competition.Subject.Name;
 
       competition.CompetitionParticipant.forEach((participant) => {
         const student = participant.Student;
@@ -67,35 +96,14 @@ export class StatisticsController {
         const stage = student.Stage;
         const studentClass = student.Class;
 
-        // Inisialisasi struktur data untuk jenjang
-        if (!report[stage]) {
-          report[stage] = {};
-        }
-        if (!report[stage][studentClass]) {
-          report[stage][studentClass] = {};
-        }
-        if (!report[stage][studentClass][subjectName]) {
-          report[stage][studentClass][subjectName] = 0;
-        }
+        if (!report[stage] || !report[stage][studentClass]) return;
 
-        // Tambahkan jumlah peserta untuk tiap kategori
         report[stage][studentClass][subjectName] += 1;
         totalPerStage[stage] += 1;
         grandTotal += 1;
 
-        // Akumulasi total per kelas dalam jenjang
-        if (!totalPerLevel[stage]) {
-          totalPerLevel[stage] = {};
-        }
-        if (!totalPerLevel[stage][studentClass]) {
-          totalPerLevel[stage][studentClass] = 0;
-        }
         totalPerLevel[stage][studentClass] += 1;
 
-        // Akumulasi total per mata pelajaran
-        if (!totalPerSubject[subjectName]) {
-          totalPerSubject[subjectName] = 0;
-        }
         totalPerSubject[subjectName] += 1;
       });
     });
