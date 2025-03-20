@@ -149,15 +149,24 @@ export class StudentController {
       );
     }
 
-    const userExcist = await this.prismaService.user.findFirst({
+    const userExists = await this.prismaService.user.findFirst({
       where: { Id: body.idUser ?? '' },
     });
 
-    if (!userExcist) {
+    if (!userExists) {
       throw new BadRequestException(
         this.utilityService.globalResponse({
           statusCode: 400,
           message: 'User not found',
+        }),
+      );
+    }
+
+    if (!/^\d{16}$/.test(body.nik)) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'NIK must be exactly 16 digits',
         }),
       );
     }

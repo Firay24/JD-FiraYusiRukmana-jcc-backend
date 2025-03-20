@@ -153,10 +153,10 @@ model CompetitionRoom {
   DateUpdate             DateTime?                @updatedAt
   Name                   String
   CompetitionId          String
-  SupervisorId           String
+  SupervisorId           String?
   CompetitionParticipant CompetitionParticipant[]
   Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
-  Supervisor             Supervisor               @relation(fields: [SupervisorId], references: [Id])
+  Supervisor             Supervisor?              @relation(fields: [SupervisorId], references: [Id])
 }
 
 model CompetitionParticipant {
