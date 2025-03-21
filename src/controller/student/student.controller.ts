@@ -185,6 +185,10 @@ export class StudentController {
       idMember = (studentCount + 1).toString();
     }
 
+    // Cek apakah Stage atau Class berubah
+    const isStageChanged = dbStudent && dbStudent.Stage !== body.stage;
+    const isClassChanged = dbStudent && dbStudent.Class !== body.class;
+
     const student = await this.prismaService.student.upsert({
       where: { Id: studentId },
       update: {
@@ -224,6 +228,41 @@ export class StudentController {
         },
       },
     });
+
+    if (isClassChanged || isStageChanged) {
+      const dbCompetitionParticipants = await this.prismaService.competitionParticipant.findMany({
+        where: { StudentId: studentId },
+        include: { Competition: true },
+      });
+
+      const upcomingCompetitions = dbCompetitionParticipants.filter((cp) => new Date(cp.Competition.Date * 1000) > new Date());
+
+      for (const participant of upcomingCompetitions) {
+        const { SeasonId, RegionId, SubjectId } = participant.Competition;
+
+        const newCompetition = await this.prismaService.competition.findFirst({
+          where: {
+            SeasonId,
+            RegionId,
+            SubjectId,
+            Stage: body.stage,
+            Level: parseInt(body.class),
+          },
+        });
+
+        if (newCompetition) {
+          const newParticipantId = await this.utilityService.generateParticipantId(newCompetition.Id, studentId);
+
+          await this.prismaService.competitionParticipant.update({
+            where: { Id: participant.Id },
+            data: {
+              CompetitionId: newCompetition.Id,
+              ParticipantId: newParticipantId,
+            },
+          });
+        }
+      }
+    }
 
     return this.utilityService.globalResponse({
       statusCode: 200,
