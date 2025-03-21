@@ -710,10 +710,14 @@ export class ActivityController {
             Name: row.nama,
             Username: row.username,
             Password: hashedPassword,
-            RoleId: roleIdParticipant.Id,
             Birthdate: this.utilityService.getEpoch(new Date(row.tanggalLahir)),
             Gender: row.jenisKelamin === 'Perempuan' ? false : true,
-            PhoneNumber: row.noHP,
+            PhoneNumber: row.noHP.toString(),
+            Role: {
+              connect: {
+                Id: roleIdParticipant.Id,
+              },
+            },
           },
         });
 
@@ -728,7 +732,7 @@ export class ActivityController {
             Class: row.kelas.toString(),
             IdMember: idMember,
             SchoolId: schoolId,
-            NIK: row.nik,
+            NIK: row.nik.toString(),
             FatherName: '',
             MotherName: '',
             IdUser: user.Id,
