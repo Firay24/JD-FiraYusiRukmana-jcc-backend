@@ -119,7 +119,7 @@ export class ActivityController {
   // #region list by idCompetition
   @Get('participant')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
-  async listAllbtCompetition(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('idCompetition') idCompetition: string) {
+  async listAllbtCompetition(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('idCompetition') idCompetition: string, @Query('search') search: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -138,9 +138,35 @@ export class ActivityController {
     limit = Math.max(1, Math.min(limit, 100));
     const skip = (page - 1) * limit;
 
-    // Hitung total items berdasarkan idCompetition jika ada
+    let idCompetitions: string[] = [];
+
+    if (idCompetition) {
+      idCompetitions = Array.isArray(idCompetition) ? idCompetition : [idCompetition];
+    } else {
+      const competitions = await this.prismaService.competition.findMany({
+        where: {
+          SubjectId: subjectId,
+          Stage: stage as StageType,
+          Level: parseInt(level, 10),
+          SeasonId: 'c2ea4ab1f7114bbb8058',
+        },
+        select: { Id: true },
+      });
+
+      if (!competitions.length) {
+        throw new BadRequestException(
+          this.utilityService.globalResponse({
+            statusCode: 404,
+            message: 'No competitions found',
+          }),
+        );
+      }
+
+      idCompetitions = competitions.map((comp) => comp.Id);
+    }
+
     const totalItems = await this.prismaService.competitionParticipant.count({
-      where: { CompetitionId: idCompetition },
+      where: { OR: [{ Student: { User: { Name: { contains: search, mode: 'insensitive' } } } }], CompetitionId: { in: idCompetitions } },
     });
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -148,7 +174,7 @@ export class ActivityController {
     const dbActivity = await this.prismaService.competitionParticipant.findMany({
       skip,
       take: limit,
-      where: { CompetitionId: idCompetition },
+      where: { OR: [{ Student: { User: { Name: { contains: search, mode: 'insensitive' } } } }], CompetitionId: { in: idCompetitions } },
       orderBy: {
         Score: 'desc',
       },
@@ -173,6 +199,7 @@ export class ActivityController {
         totalItems,
         totalPages,
         data: dbActivity.map((activity) => ({
+          id: activity.Student.Id,
           score: activity.Score,
           name: activity.Student.User.Name,
           school: activity.Student.School.Name,
