@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
@@ -15,9 +15,9 @@ export class StatisticsController {
   ) {}
 
   // #region statistic
-  @Get(':id')
+  @Get('summary')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN])
-  async statistics(@Req() request: Request, @Param('id') id: string) {
+  async statistics(@Req() request: Request, @Query('id') id: string) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -34,7 +34,7 @@ export class StatisticsController {
     }
 
     const competitionsDb = await this.prismaService.competition.findMany({
-      where: { RegionId: id },
+      where: id ? { RegionId: id } : {},
       include: {
         Subject: true,
         CompetitionParticipant: {

@@ -73,6 +73,7 @@ export class StudentController {
         poin: dbStudent.Poin,
         totalActivity: dbStudent.CompetitionParticipant.length,
         avarageScore: averageScore._avg.Score,
+        gender: dbUser.Gender,
       },
     });
   }
