@@ -202,6 +202,7 @@ export class ActivityController {
           id: activity.Student.Id,
           score: activity.Score,
           name: activity.Student.User.Name,
+          idMember: activity.Student.IdMember,
           school: activity.Student.School.Name,
           class: activity.Student.Class,
           stage: activity.Student.Stage,
