@@ -687,6 +687,23 @@ export class ActivityController {
         where: { NIK: row.nik },
       });
 
+      if (student) {
+        await this.prismaService.paymentStatusHistory.deleteMany({
+          where: { PaymentId: payment.Id },
+        });
+
+        await this.prismaService.payment.deleteMany({
+          where: { Id: payment.Id },
+        });
+
+        throw new BadRequestException(
+          this.utilityService.globalResponse({
+            statusCode: 404,
+            message: `NIK ${row.nik} already exists`,
+          }),
+        );
+      }
+
       if (!student) {
         const dbUser = await this.prismaService.user.findFirst({
           where: { Username: row.username },
@@ -699,10 +716,12 @@ export class ActivityController {
 
         const messagePassword = this.utilityService.validatePassword(row.password);
         if (messagePassword)
-          return this.utilityService.globalResponse({
-            statusCode: 400,
-            message: messagePassword,
-          });
+          throw new BadRequestException(
+            this.utilityService.globalResponse({
+              statusCode: 400,
+              message: messagePassword,
+            }),
+          );
 
         const hashedPassword = this.utilityService.hashPassword(row.password);
         const user = await this.prismaService.user.create({

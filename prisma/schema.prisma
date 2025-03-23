@@ -267,6 +267,7 @@ enum StageType {
   TK
   SD
   SMP
+  LEMBAGA
 }
 
 enum ActiveStatus {
