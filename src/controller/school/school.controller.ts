@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -7,6 +7,19 @@ import { UtilityService } from 'src/services/utility.service';
 import { Request } from 'express';
 import { StageType, StatusSchool, Subdistrict } from '@prisma/client';
 import { SchoolSaveDto } from 'src/types/controller/school/school.dto';
+import * as fs from 'fs';
+import * as xlsx from 'xlsx';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+interface ExcelRow {
+  nama: string;
+  alamat: string;
+  status: string;
+  kecamatan: string;
+  jenjang: string;
+}
 
 @Controller()
 @UseGuards(RolesGuard)
@@ -123,6 +136,87 @@ export class SchoolController {
         name: school.Name,
       })),
     });
+  }
+  // #endregion
+
+  // #region save-batch
+  @Post('batch-save')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR])
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + path.extname(file.originalname));
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(xlsx|xls)$/)) {
+          return cb(new BadRequestException('Only Excel files are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', file.filename);
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data: ExcelRow[] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    fs.unlinkSync(filePath);
+
+    for (const row of data) {
+      const existingSchool = await this.prismaService.school.findFirst({
+        where: {
+          Name: row.nama,
+        },
+      });
+
+      let nameSchool: string;
+      if (existingSchool) {
+        nameSchool = row.nama + ' ' + row.kecamatan;
+      } else {
+        nameSchool = row.nama;
+      }
+
+      await this.prismaService.school.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          Name: nameSchool.toUpperCase(),
+          Stage: row.jenjang as StageType,
+          Subdistrict: row.kecamatan as Subdistrict,
+          Status: row.status as StatusSchool,
+          Ward: row.alamat,
+        },
+      });
+    }
+
+    return {
+      message: 'Successfully',
+      data: {
+        total: data.length,
+      },
+    };
   }
   // #endregion
 }
