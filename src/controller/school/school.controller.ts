@@ -100,8 +100,10 @@ export class SchoolController {
       );
     }
 
+    const whereCondition = stage ? { OR: [{ Stage: stage }, { Stage: StageType.LEMBAGA }] } : { Stage: StageType.LEMBAGA };
+
     const schoolDb = await this.prismaService.school.findMany({
-      where: { Stage: stage },
+      where: whereCondition,
     });
 
     if (!schoolDb) {
