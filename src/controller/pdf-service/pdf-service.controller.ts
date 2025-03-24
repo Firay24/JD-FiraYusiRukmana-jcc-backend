@@ -14,7 +14,7 @@ export class PdfServiceController {
   async processPdf(filePath: string, competitionId: string) {
     const competition = await this.prismaService.competition.findUnique({
       where: { Id: competitionId },
-      select: { Subject: true, Stage: true, Level: true },
+      include: { Region: true, Season: true, Subject: true },
     });
 
     if (!competition) {
@@ -22,7 +22,7 @@ export class PdfServiceController {
     }
 
     // Buat nama folder berdasarkan subject-stage-level
-    const folderName = `${competition.Subject.Name}-${competition.Stage}-${competition.Level}`;
+    const folderName = `S${competition.Season.Name}-R${competition.Region.Region}-${competition.Subject.Name}-${competition.Stage}-${competition.Level}`;
     const competitionFolder = path.join(process.cwd(), 'students_pdfs', folderName);
 
     // Buat folder jika belum ada
