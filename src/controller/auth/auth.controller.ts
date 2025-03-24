@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 
 import { UtilityService } from 'src/services/utility.service';
 import { PrismaService } from 'src/services/prisma.service';
@@ -97,27 +97,50 @@ export class AuthController {
     phoneNumber = phoneNumber.trim();
     gender = gender;
 
-    if (!name)
-      return this.utilityService.globalResponse({
-        statusCode: 409,
-        message: 'First Name cannot empty',
-      });
+    if (!name) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Name cannot be empty',
+        }),
+      );
+    }
 
-    const dbUser = await this.prismaService.user.findFirst({
+    const existingUser = await this.prismaService.user.findFirst({
       where: { Username: username },
     });
-    if (dbUser)
-      return this.utilityService.globalResponse({
-        statusCode: 409,
-        message: 'Username already exists',
-      });
+
+    if (existingUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Username already exists',
+        }),
+      );
+    }
+
+    const existingName = await this.prismaService.user.findFirst({
+      where: { Name: name },
+    });
+
+    if (existingName) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Name already exists',
+        }),
+      );
+    }
 
     const messagePassword = this.utilityService.validatePassword(password);
-    if (messagePassword)
-      return this.utilityService.globalResponse({
-        statusCode: 400,
-        message: messagePassword,
-      });
+    if (messagePassword) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: messagePassword,
+        }),
+      );
+    }
 
     const hashedPassword = this.utilityService.hashPassword(password);
 
