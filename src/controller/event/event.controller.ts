@@ -271,7 +271,7 @@ export class EventController {
     // Ambil data kompetisi untuk mendapatkan nama folder
     const competition = await this.prismaService.competition.findUnique({
       where: { Id: competitionId },
-      select: { Subject: true, Stage: true, Level: true },
+      include: { Region: true, Season: true, Subject: true },
     });
 
     if (!competition) {
@@ -279,7 +279,7 @@ export class EventController {
     }
 
     // Buat nama folder berdasarkan subject-stage-level
-    const folderName = `${competition.Subject.Name}-${competition.Stage}-${competition.Level}`;
+    const folderName = `S${competition.Season.Name}-R${competition.Region.Region}-${competition.Subject.Name}-${competition.Stage}-${competition.Level}`;
     const filePath = path.join(process.cwd(), 'students_pdfs', folderName, filename);
 
     // Cek apakah file ada di path yang benar
