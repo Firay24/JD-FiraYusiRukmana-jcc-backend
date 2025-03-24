@@ -172,6 +172,19 @@ export class StudentController {
       );
     }
 
+    const nikExists = await this.prismaService.student.findFirst({
+      where: { NIK: body.nik },
+    });
+
+    if (nikExists && (!body.id || nikExists.Id !== body.id)) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'NIK already exists',
+        }),
+      );
+    }
+
     const dbStudent = await this.prismaService.student.findFirst({
       where: { Id: body.id ?? '' },
     });
