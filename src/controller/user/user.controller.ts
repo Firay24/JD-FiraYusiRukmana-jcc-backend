@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Put, Req, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
@@ -83,6 +83,59 @@ export class UserController {
         Password: updatedPassword,
         RoleId: roleId?.trim() || dbUser.RoleId,
         Birthdate: birthdate ? birthdate : dbUser.Birthdate,
+        Gender: gender || dbUser.Gender,
+        PhoneNumber: phoneNumber?.trim() || dbUser.PhoneNumber,
+      },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'User Updated Successfully',
+      data: { id: updatedUser.Id },
+    });
+  }
+
+  @Put('update/admin/:id')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
+  async updateUserById(@Param('id') userId: string, @Body() body: AuthDto) {
+    const { username, password, email, name, roleId, birthdate, gender, phoneNumber } = body;
+
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: userId },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    let updatedPassword = dbUser.Password;
+    if (password) {
+      const messagePassword = this.utilityService.validatePassword(password);
+      if (messagePassword) {
+        return this.utilityService.globalResponse({
+          statusCode: 400,
+          message: messagePassword,
+        });
+      }
+
+      updatedPassword = this.utilityService.hashPassword(password);
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { Id: userId },
+      data: {
+        Name: name?.trim() || dbUser.Name,
+        Username: username?.trim() || dbUser.Username,
+        Email: email?.trim() || dbUser.Email,
+        Password: updatedPassword,
+        RoleId: roleId?.trim() || dbUser.RoleId,
+        Birthdate: birthdate || dbUser.Birthdate,
         Gender: gender || dbUser.Gender,
         PhoneNumber: phoneNumber?.trim() || dbUser.PhoneNumber,
       },
