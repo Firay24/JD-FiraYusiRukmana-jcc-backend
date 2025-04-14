@@ -655,7 +655,6 @@ export class ActivityController {
     const data: ExcelRow[] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
     fs.unlinkSync(filePath);
 
-    // let totalAmount = 0;
     const calculatePrice = this.utilityService.calculatePrice(data.length, 70000);
     const payment = await this.prismaService.payment.create({
       data: {
@@ -682,49 +681,29 @@ export class ActivityController {
     });
 
     for (const row of data) {
-      let idMember: string;
       let student = await this.prismaService.student.findFirst({
         where: { NIK: row.nik },
       });
 
-      if (student) {
-        await this.prismaService.paymentStatusHistory.deleteMany({
-          where: { PaymentId: payment.Id },
-        });
-
-        await this.prismaService.payment.deleteMany({
-          where: { Id: payment.Id },
-        });
-
-        throw new BadRequestException(
-          this.utilityService.globalResponse({
-            statusCode: 404,
-            message: `NIK ${row.nik} already exists`,
-          }),
-        );
-      }
+      let userId: string;
 
       if (!student) {
-        const dbUser = await this.prismaService.user.findFirst({
+        const user = await this.prismaService.user.findFirst({
           where: { Username: row.username },
         });
-        if (dbUser)
-          return this.utilityService.globalResponse({
-            statusCode: 409,
-            message: 'Username already exists',
-          });
+
+        if (user) {
+          // Generate username baru dari nama dan tanggal lahir
+          const birth = new Date(row.tanggalLahir);
+          const formattedDate = `${birth.getFullYear()}${(birth.getMonth() + 1).toString().padStart(2, '0')}${birth.getDate().toString().padStart(2, '0')}`;
+          row.username = `${row.nama.replace(/\s+/g, '').toLowerCase()}${formattedDate}`;
+        }
 
         const messagePassword = this.utilityService.validatePassword(row.password);
-        if (messagePassword)
-          throw new BadRequestException(
-            this.utilityService.globalResponse({
-              statusCode: 400,
-              message: messagePassword,
-            }),
-          );
+        if (messagePassword) continue;
 
         const hashedPassword = this.utilityService.hashPassword(row.password);
-        const user = await this.prismaService.user.create({
+        const createdUser = await this.prismaService.user.create({
           data: {
             Id: this.utilityService.generateId(),
             Name: row.nama,
@@ -734,15 +713,15 @@ export class ActivityController {
             Gender: row.jenisKelamin === 'Perempuan' ? false : true,
             PhoneNumber: row.noHP.toString(),
             Role: {
-              connect: {
-                Id: roleIdParticipant.Id,
-              },
+              connect: { Id: roleIdParticipant.Id },
             },
           },
         });
 
+        userId = createdUser.Id;
+
         const studentCount = await this.prismaService.student.count();
-        idMember = (studentCount + 1).toString();
+        const idMember = (studentCount + 1).toString();
 
         student = await this.prismaService.student.create({
           data: {
@@ -755,7 +734,7 @@ export class ActivityController {
             NIK: row.nik.toString(),
             FatherName: '',
             MotherName: '',
-            IdUser: user.Id,
+            IdUser: userId,
           },
         });
       }
@@ -765,22 +744,27 @@ export class ActivityController {
       });
 
       const dbEvent = await this.prismaService.competition.findFirst({
-        where: { Stage: row.jenjang as StageType, Level: parseInt(row.kelas, 10), SubjectId: subject.Id, SeasonId: seasonId, RegionId: regionId },
+        where: {
+          Stage: row.jenjang as StageType,
+          Level: parseInt(row.kelas, 10),
+          SubjectId: subject?.Id,
+          SeasonId: seasonId,
+          RegionId: regionId,
+        },
       });
 
-      if (!dbEvent) {
-        return this.utilityService.globalResponse({
-          statusCode: 404,
-          message: `Competition not found for subject: ${row.matpel}, stage: ${row.jenjang}, level: ${row.kelas}`,
-        });
-      }
+      if (!dbEvent) continue;
 
-      // if (index === 10) {
-      //   totalAmount += 0;
-      // } else {
-      //   totalAmount += dbEvent.Price;
-      // }
       const participantId = await this.utilityService.generateParticipantId(dbEvent.Id, student.Id);
+
+      const alreadyParticipant = await this.prismaService.competitionParticipant.findFirst({
+        where: {
+          StudentId: student.Id,
+          CompetitionId: dbEvent.Id,
+        },
+      });
+
+      if (alreadyParticipant) continue;
 
       await this.prismaService.competitionParticipant.create({
         data: {
@@ -798,21 +782,10 @@ export class ActivityController {
       });
     }
 
-    // await this.prismaService.payment.update({
-    //   where: { Id: payment.Id },
-    //   data: {
-    //     Amount: totalAmount,
-    //   },
-    // });
-
-    return {
-      message: 'Upload sukses',
-      data: {
-        id: payment.Id,
-        totalParticipant: data.length,
-        amount: calculatePrice,
-      },
-    };
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Upload and registration completed successfully',
+    });
   }
   // #endregion
 }
