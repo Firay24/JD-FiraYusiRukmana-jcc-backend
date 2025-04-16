@@ -320,4 +320,5 @@ enum Subdistrict {
   GIRI
   KALIPURO
   WONGSOREJO
+  TROPODO
 }
