@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { Roles } from 'src/guard/roles/roles.decorator';
@@ -75,6 +75,80 @@ export class StudentController {
         avarageScore: averageScore._avg.Score,
         gender: dbUser.Gender,
       },
+    });
+  }
+  // #endregion
+
+  // #region participant
+  @Get('list/all')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async listParticipant(@Req() request: Request, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      where: {
+        Competition: {
+          SeasonId: seasonId,
+          RegionId: regionId,
+        },
+      },
+      include: {
+        Student: {
+          include: {
+            User: true,
+            School: true,
+          },
+        },
+        Competition: {
+          include: {
+            Season: true,
+            Region: true,
+            Subject: true,
+          },
+        },
+      },
+    });
+
+    const groupedStudent = new Map<string, any>();
+
+    for (const participant of dbActivity) {
+      const studentId = participant.Student.Id;
+
+      if (!groupedStudent.has(studentId)) {
+        groupedStudent.set(studentId, {
+          idMember: participant.Student.IdMember,
+          name: participant.Student.User.Name,
+          school: participant.Student.School.Name,
+          class: participant.Student.Class,
+          stage: participant.Student.Stage,
+          subject: [],
+        });
+      }
+
+      const group = groupedStudent.get(studentId);
+
+      if (group.subject.length < 4) {
+        group.subject.push(participant.Competition.Subject.Name);
+      }
+    }
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: Array.from(groupedStudent.values()),
     });
   }
   // #endregion

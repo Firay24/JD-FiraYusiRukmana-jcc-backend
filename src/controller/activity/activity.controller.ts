@@ -217,7 +217,7 @@ export class ActivityController {
   // #region list all
   @Get('list/all')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
-  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string, @Query('search') search: string) {
+  async listAll(@Req() request: Request, @Query('page') page: number = 1, @Query('limit') limit: number = 20, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string, @Query('stage') stage: string, @Query('level') level: string, @Query('subjectId') subjectId: string, @Query('search') search: string, @Query('date') date: number) {
     const user = request.user;
     const dbUser = await this.prismaService.user.findFirst({
       where: { Id: user.id },
@@ -235,6 +235,18 @@ export class ActivityController {
 
     limit = Math.max(1, Math.min(limit, 100));
 
+    let startOfDay: number | undefined;
+    let endOfDay: number | undefined;
+
+    if (date) {
+      const inputDate = new Date(date * 1000);
+      inputDate.setUTCHours(0, 0, 0, 0);
+      startOfDay = Math.floor(inputDate.getTime() / 1000);
+
+      inputDate.setUTCHours(23, 59, 59, 999);
+      endOfDay = Math.floor(inputDate.getTime() / 1000);
+    }
+
     const skip = (page - 1) * limit;
     const totalItems = await this.prismaService.competitionParticipant.count({
       where: {
@@ -246,6 +258,16 @@ export class ActivityController {
           Level: parseInt(level) || undefined,
           SubjectId: subjectId || undefined,
         },
+        ...(startOfDay && endOfDay
+          ? {
+              Payment: {
+                Date: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
+              },
+            }
+          : {}),
       },
     });
     const totalPages = Math.ceil(totalItems / limit);
@@ -261,6 +283,16 @@ export class ActivityController {
           Level: parseInt(level) || undefined,
           SubjectId: subjectId || undefined,
         },
+        ...(startOfDay && endOfDay
+          ? {
+              Payment: {
+                Date: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
+              },
+            }
+          : {}),
       },
       include: { Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
     });
@@ -292,6 +324,8 @@ export class ActivityController {
             id: activity.PaymentId,
             status: activity.Payment.Status,
             invoice: activity.Payment.Invoice,
+            amount: activity.Payment.Amount,
+            date: activity.Payment.Date,
           },
           competition: {
             id: activity.CompetitionId,
