@@ -101,7 +101,7 @@ export class ActivityController {
           date: dbActivity.Competition.Date,
           location: dbActivity.Competition.Location,
           room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
-          supervisor: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Supervisor.Name : null,
+          supervisor: '',
         },
         detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({
           status: history.Status,
@@ -294,7 +294,7 @@ export class ActivityController {
             }
           : {}),
       },
-      include: { Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
+      include: { CompetitionRoom: true, Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
     });
 
     dbActivity.sort((a, b) => {
@@ -330,6 +330,7 @@ export class ActivityController {
           competition: {
             id: activity.CompetitionId,
             name: activity.Competition.Name,
+            room: activity.CompetitionRoom ? activity.CompetitionRoom.Name : '-',
             subject: {
               id: activity.Competition.SubjectId,
               name: activity.Competition.Subject.Name,

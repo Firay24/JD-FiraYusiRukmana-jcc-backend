@@ -153,6 +153,66 @@ export class StudentController {
   }
   // #endregion
 
+  // #region participant
+  @Get('list/classes')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async listParticipantClass(@Req() request: Request, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      where: {
+        Competition: {
+          SeasonId: seasonId,
+          RegionId: regionId,
+        },
+      },
+      include: {
+        CompetitionRoom: true,
+        Student: {
+          include: {
+            User: true,
+            School: true,
+          },
+        },
+        Competition: {
+          include: {
+            Season: true,
+            Region: true,
+            Subject: true,
+          },
+        },
+      },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbActivity.map((participant) => ({
+        idMember: participant.Student.IdMember,
+        name: participant.Student.User.Name,
+        school: participant.Student.School.Name,
+        class: participant.Student.Class,
+        stage: participant.Student.Stage,
+        mapel: participant.Competition.Subject.Name,
+        room: participant.CompetitionRoom ? participant.CompetitionRoom.Name : '',
+      })),
+    });
+  }
+  // #endregion
+
   // #region student by payment
   @Get('payment/:id')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT, Role.SUPERADMIN])
