@@ -90,7 +90,7 @@ export class PdfServiceController {
       },
       data: {
         PathAnswer: relativePath,
-        Score: pointsEarned,
+        Score: pointsEarned ? pointsEarned : 0,
       },
     });
   }
