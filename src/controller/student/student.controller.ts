@@ -106,6 +106,7 @@ export class StudentController {
         },
       },
       include: {
+        CompetitionRoom: true,
         Student: {
           include: {
             User: true,
@@ -141,7 +142,10 @@ export class StudentController {
       const group = groupedStudent.get(studentId);
 
       if (group.subject.length < 4) {
-        group.subject.push(participant.Competition.Subject.Name);
+        group.subject.push({
+          name: participant.Competition.Subject.Name,
+          room: participant.CompetitionRoom ? participant.CompetitionRoom.Name : '',
+        });
       }
     }
 
@@ -153,7 +157,7 @@ export class StudentController {
   }
   // #endregion
 
-  // #region participant
+  // #region participant class
   @Get('list/classes')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
   async listParticipantClass(@Req() request: Request, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string) {

@@ -478,14 +478,14 @@ export class ActivityController {
           Date: this.utilityService.getEpoch(new Date()),
           UserId: user.id,
           Amount: dbEvent.Price,
-          Status: 'COMPLETED',
+          Status: 'PENDING',
         },
       });
       await this.prismaService.paymentStatusHistory.create({
         data: {
           Id: this.utilityService.generateUuid(),
           PaymentId: payment.Id,
-          Status: 'COMPLETED',
+          Status: 'PENDING',
           Date: this.utilityService.getEpoch(new Date()),
         },
       });
