@@ -172,12 +172,12 @@ export class ActivityController {
     const totalPages = Math.ceil(totalItems / limit);
 
     const dbActivity = await this.prismaService.competitionParticipant.findMany({
-      skip,
-      take: limit,
+      // skip,
+      // take: limit,
       where: { OR: [{ Student: { User: { Name: { contains: search, mode: 'insensitive' } } } }], CompetitionId: { in: idCompetitions } },
-      orderBy: {
-        Score: 'desc',
-      },
+      // orderBy: {
+      //   Score: 'desc',
+      // },
       include: {
         Competition: { include: { Subject: true, Season: true, Region: true } },
         Payment: true,
@@ -190,6 +190,9 @@ export class ActivityController {
       },
     });
 
+    const sortedActivities = dbActivity.filter((a) => a.Score !== null).sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0));
+    const paginated = sortedActivities.slice(skip, skip + limit);
+
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Success',
@@ -198,7 +201,7 @@ export class ActivityController {
         limit,
         totalItems,
         totalPages,
-        data: dbActivity.map((activity) => ({
+        data: paginated.map((activity) => ({
           id: activity.Student.Id,
           score: activity.Score,
           name: activity.Student.User.Name,
