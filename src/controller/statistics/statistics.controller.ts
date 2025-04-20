@@ -14,6 +14,108 @@ export class StatisticsController {
     private utilityService: UtilityService,
   ) {}
 
+  // #region rank
+  @Get('rank')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN])
+  async rank(@Req() request: Request, @Query('seasonId') seasonId: string, @Query('regionId') regionId: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    if (!seasonId) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Season ID is required',
+        }),
+      );
+    }
+
+    const subjectOrder = ['matematika', 'bahasa inggris', 'ipa', 'ips'];
+
+    const stageLevelOrder = [
+      { stage: 'TK', level: 0 },
+      { stage: 'SD', level: 1 },
+      { stage: 'SD', level: 2 },
+      { stage: 'SD', level: 3 },
+      { stage: 'SD', level: 4 },
+      { stage: 'SD', level: 5 },
+      { stage: 'SD', level: 6 },
+      { stage: 'SMP', level: 1 },
+      { stage: 'SMP', level: 2 },
+      { stage: 'SMP', level: 3 },
+    ];
+
+    const dbCompetition = await this.prismaService.competition.findMany({
+      where: {
+        SeasonId: seasonId,
+        ...(regionId && { RegionId: regionId }),
+      },
+      include: {
+        Subject: true,
+        CompetitionParticipant: {
+          include: {
+            Student: {
+              include: {
+                User: true,
+                School: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const rankedCompetition = dbCompetition.map((competition) => {
+      const topRank = competition.CompetitionParticipant.filter((participant) => participant.Score !== null)
+        .sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0))
+        .slice(0, 3)
+        .map((participant) => {
+          return {
+            name: participant.Student.User.Name,
+            school: participant.Student.School.Name,
+            score: participant.Score,
+          };
+        });
+
+      return {
+        competitionName: competition.Name,
+        subject: competition.Subject.Name,
+        stage: competition.Stage,
+        level: competition.Level,
+        rank: topRank,
+      };
+    });
+
+    rankedCompetition.sort((a, b) => {
+      const subjectCompare = subjectOrder.indexOf(a.subject) - subjectOrder.indexOf(b.subject);
+      if (subjectCompare !== 0) return subjectCompare;
+
+      const aIndex = stageLevelOrder.findIndex((s) => s.stage === a.stage && s.level === a.level);
+      const bIndex = stageLevelOrder.findIndex((s) => s.stage === b.stage && s.level === b.level);
+
+      return aIndex - bIndex;
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: rankedCompetition,
+    });
+  }
+  // #endregion
+
   // #region statistic
   @Get('summary')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN])
