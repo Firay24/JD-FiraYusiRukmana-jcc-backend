@@ -1,4 +1,4 @@
-import { PrismaClient, StageType } from '@prisma/client';
+import { PrismaClient, StageType, StatusSchool, Subdistrict } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 // import { schools } from '../src/data/school';
 // import { kisikisi } from '../src/data/kisi-kisi';
 // import { regionsOfBwi } from '../src/data/region';
-import { competitions } from '../src/data/competition';
+// import { competitions } from '../src/data/competition';
 
 dayjs.extend(utc);
 
@@ -38,6 +38,75 @@ const generateUuid = () => {
 };
 
 async function main() {
+  const schools = [
+    { name: 'SD NEGERI 1 BAGOREJO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 KEPUNDUNGAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 PARIJATAH KULON', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 PARIJATAH WETAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 REJOAGUNG', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 SUKOMAJU', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 SUKONATAR', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 SUMBERSARI', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 1 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 BAGOREJO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 KEPUNDUNGAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 PARIJATAH KULON', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 PARIJATAH WETAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 REJOAGUNG', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 SUKOMAJU', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 SUKONATAR', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 SUMBERSARI', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 2 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 BAGOREJO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 KEPUNDUNGAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 PARIJATAH KULON', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 PARIJATAH WETAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 SUKOMAJU', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 SUKONATAR', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 SUMBERSARI', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 3 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 BAGOREJO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 KEPUNDUNGAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 PARIJATAH KULON', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 PARIJATAH WETAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 SUMBERSARI', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 4 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 5 BAGOREJO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 5 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 5 PARIJATAH KULON', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 5 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 6 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 6 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 7 KEBAMAN', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD NEGERI 8 WONOSOBO', subdistrict: 'SRONO', ward: 'SRONO', status: 'NEGERI' },
+    { name: 'SD AL KAUTSAR', subdistrict: 'SRONO', ward: 'SRONO', status: 'SWASTA' },
+    { name: 'SDI NU NURUL FALAH', subdistrict: 'SRONO', ward: 'SRONO', status: 'SWASTA' },
+  ];
+
+  for (const school of schools) {
+    const existing = await prisma.school.findFirst({
+      where: {
+        Name: school.name,
+      },
+    });
+
+    if (!existing) {
+      await prisma.school.create({
+        data: {
+          Id: generateUuid(),
+          Name: school.name,
+          Subdistrict: school.subdistrict as Subdistrict,
+          Ward: school.ward,
+          Stage: 'SD' as StageType,
+          Status: school.status as StatusSchool,
+        },
+      });
+    }
+  }
+
   // #region school
   // await prisma.school.createMany({
   //   skipDuplicates: true,
@@ -213,26 +282,26 @@ async function main() {
   // });
   // #endregion
   // #region Competition
-  await prisma.competition.createMany({
-    skipDuplicates: true,
-    data: competitions.map((competition) => ({
-      Id: generateUuid(),
-      DateCreate: new Date(),
-      DateUpdate: new Date(),
-      Name: competition.name,
-      Description: competition.description,
-      Date: competition.date,
-      Level: competition.level,
-      Stage: competition.stage as StageType,
-      Price: competition.price,
-      RegionId: competition.regionId,
-      Location: competition.location,
-      SeasonId: competition.seasonId,
-      SubjectId: competition.subjectId,
-      CodePackage: competition.codePackage,
-      PathAnswer: competition.pathAnswer,
-    })),
-  });
+  // await prisma.competition.createMany({
+  //   skipDuplicates: true,
+  //   data: competitions.map((competition) => ({
+  //     Id: generateUuid(),
+  //     DateCreate: new Date(),
+  //     DateUpdate: new Date(),
+  //     Name: competition.name,
+  //     Description: competition.description,
+  //     Date: competition.date,
+  //     Level: competition.level,
+  //     Stage: competition.stage as StageType,
+  //     Price: competition.price,
+  //     RegionId: competition.regionId,
+  //     Location: competition.location,
+  //     SeasonId: competition.seasonId,
+  //     SubjectId: competition.subjectId,
+  //     CodePackage: competition.codePackage,
+  //     PathAnswer: competition.pathAnswer,
+  //   })),
+  // });
 }
 main()
   .then(async () => {
