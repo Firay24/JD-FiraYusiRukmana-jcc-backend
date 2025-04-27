@@ -83,9 +83,11 @@ export class StatisticsController {
         .slice(0, 3)
         .map((participant) => {
           return {
+            id: participant.Id,
             name: participant.Student.User.Name,
             school: participant.Student.School.Name,
             score: participant.Score,
+            attedance: participant.Attedance,
           };
         });
 
