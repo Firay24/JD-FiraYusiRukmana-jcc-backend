@@ -24,3 +24,8 @@ export class CompetitionCreateDto {
   pathAnswer?: string;
   amount?: number;
 }
+
+export class UpdateAttendanceDto {
+  id: string;
+  attedance: boolean;
+}

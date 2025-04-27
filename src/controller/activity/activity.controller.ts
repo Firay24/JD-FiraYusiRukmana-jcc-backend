@@ -1,10 +1,10 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
 import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { PrismaService } from 'src/services/prisma.service';
 import { UtilityService } from 'src/services/utility.service';
-import { CompetitionCreateDto, CompetitionSaveDto } from 'src/types/controller/competition/competition.dto';
+import { CompetitionCreateDto, CompetitionSaveDto, UpdateAttendanceDto } from 'src/types/controller/competition/competition.dto';
 import { Request } from 'express';
 import * as fs from 'fs';
 import * as xlsx from 'xlsx';
@@ -215,6 +215,54 @@ export class ActivityController {
     });
   }
 
+  // #endregion
+
+  // #region attedance
+  @Patch('attendance')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.SUPERADMIN])
+  async updateAttendance(@Req() request: Request, @Body() body: UpdateAttendanceDto) {
+    const user = request.user;
+
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbCompetitionParticipant = await this.prismaService.competitionParticipant.findFirst({
+      where: { Id: body.id ?? '' },
+    });
+
+    if (!dbCompetitionParticipant) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Competition Participant not found',
+        }),
+      );
+    }
+
+    const competitionParticipant = await this.prismaService.competitionParticipant.update({
+      where: { Id: body.id },
+      data: {
+        Attedance: body.attedance,
+      },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: `Success Update Attendance`,
+      data: { id: competitionParticipant.Id, attendance: competitionParticipant.Attedance },
+    });
+  }
   // #endregion
 
   // #region list all

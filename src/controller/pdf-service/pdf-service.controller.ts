@@ -67,7 +67,7 @@ export class PdfServiceController {
   }
 
   private extractPointsEarned(text: string): number | null {
-    const match = text.match(/Points Earned:\s*(\d+)/i);
+    const match = text.match(/Points Earned:\s*(-?\d+)/i);
     return match ? parseInt(match[1], 10) : null;
   }
 
