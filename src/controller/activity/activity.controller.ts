@@ -778,9 +778,23 @@ export class ActivityController {
           where: { Username: row.username },
         });
 
+        let birth: Date;
+
+        if (typeof row.tanggalLahir === 'number') {
+          birth = new Date(Math.round((row.tanggalLahir - 25569) * 86400 * 1000));
+        } else if (typeof row.tanggalLahir === 'string') {
+          birth = new Date(row.tanggalLahir.replace(/\//g, '-'));
+        } else {
+          throw new Error(`Invalid tanggalLahir format`);
+        }
+
+        if (isNaN(birth.getTime())) {
+          throw new Error(`Parsed birthdate is invalid: ${row.tanggalLahir}`);
+        }
+
         if (user) {
           // Generate username baru dari nama dan tanggal lahir
-          const birth = new Date(row.tanggalLahir);
+          // const birth = new Date(year, month - 1, day);
           const formattedDate = `${birth.getFullYear()}${(birth.getMonth() + 1).toString().padStart(2, '0')}${birth.getDate().toString().padStart(2, '0')}`;
           row.username = `${row.nama.replace(/\s+/g, '').toLowerCase()}${formattedDate}`;
         }
@@ -795,7 +809,7 @@ export class ActivityController {
             Name: row.nama,
             Username: row.username,
             Password: hashedPassword,
-            Birthdate: this.utilityService.getEpoch(new Date(row.tanggalLahir)),
+            Birthdate: this.utilityService.getEpoch(birth),
             Gender: row.jenisKelamin === 'Perempuan' ? false : true,
             PhoneNumber: row.noHP.toString(),
             Role: {
