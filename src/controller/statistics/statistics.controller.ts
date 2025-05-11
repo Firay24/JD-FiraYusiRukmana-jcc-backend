@@ -80,7 +80,7 @@ export class StatisticsController {
     const rankedCompetition = dbCompetition.map((competition) => {
       const topRank = competition.CompetitionParticipant.filter((participant) => participant.Score !== null)
         .sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0))
-        .slice(0, 8)
+        .slice(0, 10)
         .map((participant) => {
           return {
             id: participant.Id,
