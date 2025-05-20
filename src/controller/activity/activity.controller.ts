@@ -100,7 +100,7 @@ export class ActivityController {
           subject: dbActivity.Competition.Subject.Name,
           date: dbActivity.Competition.Date,
           location: dbActivity.Competition.Location,
-          room: dbActivity.CompetitionRoom ? dbActivity.CompetitionRoom.Name : null,
+          room: null,
           supervisor: '',
         },
         detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({
@@ -381,7 +381,7 @@ export class ActivityController {
           competition: {
             id: activity.CompetitionId,
             name: activity.Competition.Name,
-            room: activity.CompetitionRoom ? activity.CompetitionRoom.Name : '-',
+            room: '-',
             subject: {
               id: activity.Competition.SubjectId,
               name: activity.Competition.Subject.Name,

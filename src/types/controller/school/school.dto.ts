@@ -1,10 +1,10 @@
-import { StageType, StatusSchool, Subdistrict } from '@prisma/client';
+import { StageType, StatusSchool } from '@prisma/client';
 
 export class SchoolSaveDto {
   id?: string;
   name: string;
   stage: StageType;
-  subdistrict: Subdistrict;
+  subdistrict: string;
   status: StatusSchool;
   ward: string;
 }

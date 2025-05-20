@@ -5,7 +5,7 @@ import { RolesGuard } from 'src/guard/roles/roles.guard';
 import { PrismaService } from 'src/services/prisma.service';
 import { UtilityService } from 'src/services/utility.service';
 import { Request } from 'express';
-import { StageType, StatusSchool, Subdistrict } from '@prisma/client';
+import { StageType, StatusSchool } from '@prisma/client';
 import { SchoolSaveDto } from 'src/types/controller/school/school.dto';
 import * as fs from 'fs';
 import * as xlsx from 'xlsx';
@@ -72,7 +72,7 @@ export class SchoolController {
         Id: schoolId,
         Name: body.name,
         Stage: body.stage as StageType,
-        Subdistrict: body.subdistrict as Subdistrict,
+        Subdistrict: body.subdistrict,
         Status: body.status as StatusSchool,
         Ward: body.ward,
       },
@@ -80,7 +80,7 @@ export class SchoolController {
         Id: schoolId,
         Name: body.name,
         Stage: body.stage as StageType,
-        Subdistrict: body.subdistrict as Subdistrict,
+        Subdistrict: body.subdistrict,
         Status: body.status as StatusSchool,
         Ward: body.ward,
       },
@@ -204,7 +204,7 @@ export class SchoolController {
           Id: this.utilityService.generateUuid(),
           Name: nameSchool.toUpperCase(),
           Stage: row.jenjang as StageType,
-          Subdistrict: row.kecamatan as Subdistrict,
+          Subdistrict: row.kecamatan,
           Status: row.status as StatusSchool,
           Ward: row.alamat,
         },

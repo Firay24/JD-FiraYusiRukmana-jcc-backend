@@ -16,9 +16,9 @@ model Role {
 }
 
 model User {
-  Id          String        @id
-  DateCreate  DateTime      @default(now())
-  DateUpdate  DateTime?     @updatedAt
+  Id          String       @id
+  DateCreate  DateTime     @default(now())
+  DateUpdate  DateTime?    @updatedAt
   Name        String
   Username    String
   Password    String
@@ -27,11 +27,10 @@ model User {
   BirthPlace  String?
   PhoneNumber String
   Gender      Boolean
-  Email       String?       @unique
-  Status      ActiveStatus  @default(ACTIVE)
-  Achievement Achievement[]
+  Email       String?      @unique
+  Status      ActiveStatus @default(ACTIVE)
   Student     Student[]
-  Role        Role          @relation(fields: [RoleId], references: [Id])
+  Role        Role         @relation(fields: [RoleId], references: [Id])
   Payment     Payment[]
 }
 
@@ -54,18 +53,21 @@ model Student {
   User                   User                     @relation(fields: [IdUser], references: [Id])
   School                 School                   @relation(fields: [SchoolId], references: [Id])
   Subscription           Subscription[]
+  Achievement            Achievement[]
 }
 
 model Achievement {
   Id            String      @id
   DateCreate    DateTime    @default(now())
   DateUpdate    DateTime?   @updatedAt
-  UserId        String
+  StudentId     String
   Category      String
   Describe      String?
+  SertifNumber  Int?
+  Note          String?
   CompetitionId String
   Competition   Competition @relation(fields: [CompetitionId], references: [Id])
-  User          User        @relation(fields: [UserId], references: [Id])
+  Student       Student     @relation(fields: [StudentId], references: [Id])
 }
 
 model Season {
@@ -98,13 +100,13 @@ model Competition {
   Price                  Int
   Location               String
   SeasonId               String
-  RegionId               String
+  RegionId               String?
   SubjectId              String
   CodePackage            String?
   PathAnswer             String?
   regionId               String?
   Achievement            Achievement[]
-  Region                 Region                   @relation(fields: [RegionId], references: [Id])
+  Region                 Region?                  @relation(fields: [RegionId], references: [Id])
   Season                 Season                   @relation(fields: [SeasonId], references: [Id])
   Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
   CompetitionParticipant CompetitionParticipant[]
@@ -121,10 +123,12 @@ model Subscription {
   StartDate     DateTime
   EndDate       DateTime
   Status        Boolean      @default(true)
+  PaymentId     String
   StudentId     String
   CompetitionId String?
   Competition   Competition? @relation(fields: [CompetitionId], references: [Id])
   Student       Student      @relation(fields: [StudentId], references: [Id])
+  Payment       Payment      @relation(fields: [PaymentId], references: [Id])
 }
 
 model Region {
@@ -147,16 +151,25 @@ model Supervisor {
   CompetitionRoom CompetitionRoom[]
 }
 
+model Room {
+  Id              String            @id
+  Name            String
+  DateCreate      DateTime          @default(now())
+  DateUpdate      DateTime?         @updatedAt
+  CompetitionRoom CompetitionRoom[]
+}
+
 model CompetitionRoom {
   Id                     String                   @id
   DateCreate             DateTime                 @default(now())
   DateUpdate             DateTime?                @updatedAt
-  Name                   String
+  RoomId                 String
   CompetitionId          String
   SupervisorId           String?
   CompetitionParticipant CompetitionParticipant[]
   Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
   Supervisor             Supervisor?              @relation(fields: [SupervisorId], references: [Id])
+  Room                   Room                     @relation(fields: [RoomId], references: [Id])
 }
 
 model CompetitionParticipant {
@@ -164,6 +177,7 @@ model CompetitionParticipant {
   DateCreate        DateTime         @default(now())
   DateUpdate        DateTime?        @updatedAt
   ParticipantId     String?
+  SertifNumber      Int?
   StudentId         String
   CompetitionId     String
   CompetitionRoomId String?
@@ -173,6 +187,7 @@ model CompetitionParticipant {
   Correct           Int?
   Incorrect         Int?
   PathAnswer        String?
+  Index             Int?
   Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
   CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
   Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
@@ -226,11 +241,13 @@ model Payment {
   Invoice                String
   Date                   Int
   Amount                 Int
+  PathTransaction        String?
   UserId                 String?                  @default("ae7317bda7b54cbc8262")
   User                   User?                    @relation(fields: [UserId], references: [Id])
   Status                 PaymentType
   CompetitionParticipant CompetitionParticipant[]
   PaymentStatusHistory   PaymentStatusHistory[]
+  Subscription           Subscription[]
 }
 
 model PaymentStatusHistory {
@@ -249,7 +266,7 @@ model School {
   DateUpdate  DateTime?    @updatedAt
   Name        String
   Stage       StageType
-  Subdistrict Subdistrict
+  Subdistrict String
   Ward        String
   Status      StatusSchool
   Student     Student[]
@@ -292,33 +309,4 @@ enum PaymentType {
   PENDING
   CONFIRMED
   COMPLETED
-}
-
-enum Subdistrict {
-  PESANGGARAN
-  SILIRAGUNG
-  BANGOREJO
-  PURWOHARJO
-  TEGALDLIMO
-  MUNCAR
-  CLURING
-  GAMBIRAN
-  TEGALSARI
-  GLENMORE
-  KALIBARU
-  GENTENG
-  SRONO
-  ROGOJAMPI
-  BLIMBINGSARI
-  KABAT
-  SINGOJURUH
-  SEMPU
-  SONGGON
-  GLAGAH
-  LICIN
-  BANYUWANGI
-  GIRI
-  KALIPURO
-  WONGSOREJO
-  TROPODO
 }

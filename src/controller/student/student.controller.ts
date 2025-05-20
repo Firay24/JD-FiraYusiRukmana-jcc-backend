@@ -144,7 +144,7 @@ export class StudentController {
       if (group.subject.length < 4) {
         group.subject.push({
           name: participant.Competition.Subject.Name,
-          room: participant.CompetitionRoom ? participant.CompetitionRoom.Name : '',
+          room: '',
         });
       }
     }
@@ -211,7 +211,7 @@ export class StudentController {
         class: participant.Student.Class,
         stage: participant.Student.Stage,
         mapel: participant.Competition.Subject.Name,
-        room: participant.CompetitionRoom ? participant.CompetitionRoom.Name : '',
+        room: '',
       })),
     });
   }
