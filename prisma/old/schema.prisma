@@ -1,0 +1,325 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../../prisma/old-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("OLD_DATABASE_URL")
+}
+
+model Role {
+  Id         String    @id
+  Name       RoleType
+  DateCreate DateTime  @default(now())
+  DateUpdate DateTime? @updatedAt
+  User       User[]
+}
+
+model User {
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
+  Name        String
+  Username    String
+  Password    String
+  RoleId      String
+  Birthdate   Int
+  BirthPlace  String?
+  PhoneNumber String
+  Gender      Boolean
+  Email       String?       @unique
+  Status      ActiveStatus  @default(ACTIVE)
+  Achievement Achievement[]
+  Student     Student[]
+  Role        Role          @relation(fields: [RoleId], references: [Id])
+  Payment     Payment[]
+}
+
+model Student {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  IdMember               String?
+  Address                String
+  Stage                  StageType
+  Class                  String
+  SchoolId               String
+  NIK                    String
+  FatherName             String?
+  MotherName             String?
+  IdUser                 String
+  PhotoPath              String?
+  Poin                   Int                      @default(0)
+  CompetitionParticipant CompetitionParticipant[]
+  User                   User                     @relation(fields: [IdUser], references: [Id])
+  School                 School                   @relation(fields: [SchoolId], references: [Id])
+  Subscription           Subscription[]
+}
+
+model Achievement {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  UserId        String
+  Category      String
+  Describe      String?
+  CompetitionId String
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+  User          User        @relation(fields: [UserId], references: [Id])
+}
+
+model Season {
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
+  Name        String
+  StartDate   Int
+  EndDate     Int
+  Competition Competition[]
+}
+
+model Subject {
+  Id          String        @id
+  DateCreate  DateTime      @default(now())
+  DateUpdate  DateTime?     @updatedAt
+  Name        String
+  Competition Competition[]
+}
+
+model Competition {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  Name                   String
+  Description            String
+  Date                   Int
+  Level                  Int
+  Stage                  StageType
+  Price                  Int
+  Location               String
+  SeasonId               String
+  RegionId               String
+  SubjectId              String
+  CodePackage            String?
+  PathAnswer             String?
+  regionId               String?
+  Achievement            Achievement[]
+  Region                 Region                   @relation(fields: [RegionId], references: [Id])
+  Season                 Season                   @relation(fields: [SeasonId], references: [Id])
+  Subject                Subject                  @relation(fields: [SubjectId], references: [Id])
+  CompetitionParticipant CompetitionParticipant[]
+  CompetitionRoom        CompetitionRoom[]
+  Kisi                   Kisi[]
+  Subscription           Subscription[]
+  Tryout                 Tryout[]
+}
+
+model Subscription {
+  Id            String       @id
+  DateCreate    DateTime     @default(now())
+  DateUpdate    DateTime?    @updatedAt
+  StartDate     DateTime
+  EndDate       DateTime
+  Status        Boolean      @default(true)
+  StudentId     String
+  CompetitionId String?
+  Competition   Competition? @relation(fields: [CompetitionId], references: [Id])
+  Student       Student      @relation(fields: [StudentId], references: [Id])
+}
+
+model Region {
+  Id           String        @id
+  DateCreate   DateTime      @default(now())
+  DateUpdate   DateTime?     @updatedAt
+  Region       Int
+  Name         String
+  RegionDetail String
+  Competition  Competition[]
+}
+
+model Supervisor {
+  Id              String            @id
+  DateCreate      DateTime          @default(now())
+  DateUpdate      DateTime?         @updatedAt
+  Name            String
+  Birthdate       Int
+  PhoneNumber     String
+  CompetitionRoom CompetitionRoom[]
+}
+
+model CompetitionRoom {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  Name                   String
+  CompetitionId          String
+  SupervisorId           String?
+  CompetitionParticipant CompetitionParticipant[]
+  Competition            Competition              @relation(fields: [CompetitionId], references: [Id])
+  Supervisor             Supervisor?              @relation(fields: [SupervisorId], references: [Id])
+}
+
+model CompetitionParticipant {
+  Id                String           @id
+  DateCreate        DateTime         @default(now())
+  DateUpdate        DateTime?        @updatedAt
+  ParticipantId     String?
+  StudentId         String
+  CompetitionId     String
+  CompetitionRoomId String?
+  PaymentId         String?
+  Attedance         Boolean?
+  Score             Int?
+  Correct           Int?
+  Incorrect         Int?
+  PathAnswer        String?
+  Competition       Competition      @relation(fields: [CompetitionId], references: [Id])
+  CompetitionRoom   CompetitionRoom? @relation(fields: [CompetitionRoomId], references: [Id], onDelete: Restrict)
+  Payment           Payment?         @relation(fields: [PaymentId], references: [Id], onDelete: Restrict)
+  Student           Student          @relation(fields: [StudentId], references: [Id])
+}
+
+model Kisi {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  Header        String?
+  Content       String
+  CompetitionId String
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+}
+
+model Tryout {
+  Id            String      @id
+  DateCreate    DateTime    @default(now())
+  DateUpdate    DateTime?   @updatedAt
+  Name          String
+  CompetitionId String
+  Question      Question[]
+  Competition   Competition @relation(fields: [CompetitionId], references: [Id])
+}
+
+model Question {
+  Id         String    @id
+  DateCreate DateTime  @default(now())
+  DateUpdate DateTime? @updatedAt
+  TryoutId   String
+  Content    String
+  Option     Option[]
+  Tryout     Tryout    @relation(fields: [TryoutId], references: [Id])
+}
+
+model Option {
+  Id         String    @id
+  DateCreate DateTime  @default(now())
+  DateUpdate DateTime? @updatedAt
+  Answer     String
+  IsCorrect  Boolean
+  QuestionId String
+  Question   Question  @relation(fields: [QuestionId], references: [Id])
+}
+
+model Payment {
+  Id                     String                   @id
+  DateCreate             DateTime                 @default(now())
+  DateUpdate             DateTime?                @updatedAt
+  Invoice                String
+  Date                   Int
+  Amount                 Int
+  UserId                 String?                  @default("ae7317bda7b54cbc8262")
+  User                   User?                    @relation(fields: [UserId], references: [Id])
+  Status                 PaymentType
+  CompetitionParticipant CompetitionParticipant[]
+  PaymentStatusHistory   PaymentStatusHistory[]
+}
+
+model PaymentStatusHistory {
+  Id         String      @id
+  DateCreate DateTime    @default(now())
+  DateUpdate DateTime?   @updatedAt
+  PaymentId  String
+  Status     PaymentType
+  Date       Int
+  Payment    Payment     @relation(fields: [PaymentId], references: [Id])
+}
+
+model School {
+  Id          String       @id
+  DateCreate  DateTime     @default(now())
+  DateUpdate  DateTime?    @updatedAt
+  Name        String
+  Stage       StageType
+  Subdistrict Subdistrict
+  Ward        String
+  Status      StatusSchool
+  Student     Student[]
+}
+
+model News {
+  Id          String    @id
+  DateCreate  DateTime  @default(now())
+  DateUpdate  DateTime? @updatedAt
+  Title       String
+  Description String
+}
+
+enum StageType {
+  TK
+  SD
+  SMP
+  LEMBAGA
+}
+
+enum ActiveStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum StatusSchool {
+  SWASTA
+  NEGERI
+}
+
+enum RoleType {
+  SUPERADMIN
+  ADMIN
+  EVENTADMIN
+  PARTICIPANT
+  FACILITATOR
+}
+
+enum PaymentType {
+  PENDING
+  CONFIRMED
+  COMPLETED
+}
+
+enum Subdistrict {
+  PESANGGARAN
+  SILIRAGUNG
+  BANGOREJO
+  PURWOHARJO
+  TEGALDLIMO
+  MUNCAR
+  CLURING
+  GAMBIRAN
+  TEGALSARI
+  GLENMORE
+  KALIBARU
+  GENTENG
+  SRONO
+  ROGOJAMPI
+  BLIMBINGSARI
+  KABAT
+  SINGOJURUH
+  SEMPU
+  SONGGON
+  GLAGAH
+  LICIN
+  BANYUWANGI
+  GIRI
+  KALIPURO
+  WONGSOREJO
+  TROPODO
+}
