@@ -106,7 +106,7 @@ export class StudentController {
         },
       },
       include: {
-        CompetitionRoom: true,
+        CompetitionRoom: { include: { Room: true } },
         Student: {
           include: {
             User: true,
@@ -144,7 +144,7 @@ export class StudentController {
       if (group.subject.length < 4) {
         group.subject.push({
           name: participant.Competition.Subject.Name,
-          room: '',
+          room: participant.CompetitionRoom.Room.Name ?? '-',
         });
       }
     }
