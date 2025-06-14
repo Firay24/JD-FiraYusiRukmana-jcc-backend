@@ -345,7 +345,7 @@ export class ActivityController {
             }
           : {}),
       },
-      include: { CompetitionRoom: true, Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
+      include: { CompetitionRoom: { include: { Room: true } }, Payment: true, Competition: { include: { Subject: true, Season: true, Region: true } }, Student: { include: { User: true, School: true } } },
     });
 
     dbActivity.sort((a, b) => {
@@ -381,7 +381,7 @@ export class ActivityController {
           competition: {
             id: activity.CompetitionId,
             name: activity.Competition.Name,
-            room: '-',
+            room: activity.CompetitionRoom?.Room.Name ?? '-',
             subject: {
               id: activity.Competition.SubjectId,
               name: activity.Competition.Subject.Name,
@@ -552,15 +552,12 @@ export class ActivityController {
 
     // Ambil sertifNumber terbesar
     let sertifNumber: number | null = null;
-    if (!dbCompetitionParticipant) {
-      const maxSertif = await this.prismaService.competitionParticipant.aggregate({
-        _max: {
-          SertifNumber: true,
-        },
-      });
-
-      sertifNumber = (maxSertif._max.SertifNumber ?? 0) + 1;
-    }
+    const maxSertif = await this.prismaService.competitionParticipant.aggregate({
+      _max: {
+        SertifNumber: true,
+      },
+    });
+    sertifNumber = (maxSertif._max.SertifNumber ?? 0) + 1;
 
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
@@ -879,6 +876,14 @@ export class ActivityController {
 
       if (alreadyParticipant) continue;
 
+      let sertifNumber: number | null = null;
+      const maxSertif = await this.prismaService.competitionParticipant.aggregate({
+        _max: {
+          SertifNumber: true,
+        },
+      });
+      sertifNumber = (maxSertif._max.SertifNumber ?? 0) + 1;
+
       await this.prismaService.competitionParticipant.create({
         data: {
           Id: this.utilityService.generateId(),
@@ -891,6 +896,7 @@ export class ActivityController {
           Correct: 0,
           Incorrect: 0,
           PathAnswer: '',
+          SertifNumber: sertifNumber,
         },
       });
     }

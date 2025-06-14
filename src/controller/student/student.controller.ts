@@ -184,7 +184,11 @@ export class StudentController {
         },
       },
       include: {
-        CompetitionRoom: true,
+        CompetitionRoom: {
+          include: {
+            Room: true,
+          },
+        },
         Student: {
           include: {
             User: true,
@@ -211,7 +215,7 @@ export class StudentController {
         class: participant.Student.Class,
         stage: participant.Student.Stage,
         mapel: participant.Competition.Subject.Name,
-        room: '',
+        room: participant.CompetitionRoom.Room.Name,
       })),
     });
   }
