@@ -550,6 +550,18 @@ export class ActivityController {
     const competitionParticipantId = dbCompetitionParticipant ? dbCompetitionParticipant.Id : this.utilityService.generateUuid();
     const participantId = await this.utilityService.generateParticipantId(body.competitionId, body.studentId);
 
+    // Ambil sertifNumber terbesar
+    let sertifNumber: number | null = null;
+    if (!dbCompetitionParticipant) {
+      const maxSertif = await this.prismaService.competitionParticipant.aggregate({
+        _max: {
+          SertifNumber: true,
+        },
+      });
+
+      sertifNumber = (maxSertif._max.SertifNumber ?? 0) + 1;
+    }
+
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
       update: {
@@ -571,6 +583,7 @@ export class ActivityController {
         StudentId: body.studentId,
         CompetitionId: body.competitionId,
         CompetitionRoomId: body.competitionRommId,
+        SertifNumber: sertifNumber,
         PaymentId: paymentId,
         Attedance: body.attedance ?? false,
         Score: body.score ?? 0,
