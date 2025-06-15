@@ -64,6 +64,7 @@ export class StatisticsController {
       },
       include: {
         Subject: true,
+        Region: true,
         CompetitionParticipant: {
           include: {
             Student: {
@@ -78,8 +79,21 @@ export class StatisticsController {
     });
 
     const rankedCompetition = dbCompetition.map((competition) => {
-      const topRank = competition.CompetitionParticipant.filter((participant) => participant.Score !== null)
-        .sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0))
+      const sortedParticipants = competition.CompetitionParticipant.filter((participant) => participant.Score !== null)
+        .sort((a, b) => {
+          const aHasIndex = a.Index !== null && a.Index !== undefined;
+          const bHasIndex = b.Index !== null && b.Index !== undefined;
+
+          if (aHasIndex && bHasIndex) {
+            return a.Index - b.Index;
+          } else if (aHasIndex) {
+            return -1;
+          } else if (bHasIndex) {
+            return 1;
+          } else {
+            return (b.Score ?? 0) - (a.Score ?? 0);
+          }
+        })
         .slice(0, 10)
         .map((participant) => {
           return {
@@ -89,6 +103,9 @@ export class StatisticsController {
             score: participant.Score,
             attedance: participant.Attedance,
             ket: participant.Correct,
+            date: competition.Date,
+            subject: competition.Subject.Name,
+            index: participant.Index,
           };
         });
 
@@ -97,7 +114,9 @@ export class StatisticsController {
         subject: competition.Subject.Name,
         stage: competition.Stage,
         level: competition.Level,
-        rank: topRank,
+        rank: sortedParticipants,
+        region: competition.Region.Name,
+        location: competition.Location,
       };
     });
 
