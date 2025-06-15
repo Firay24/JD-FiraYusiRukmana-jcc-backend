@@ -77,6 +77,7 @@ export class ActivityController {
         id: dbActivity.Id,
         participantId: dbActivity.ParticipantId,
         idjcc: dbActivity.Student.IdMember,
+        noSertif: dbActivity.SertifNumber,
         paymentId: dbActivity.PaymentId,
         paymentDate: dbActivity.Payment.Date,
         invoice: dbActivity.Payment.Invoice,
