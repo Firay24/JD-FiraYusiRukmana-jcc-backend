@@ -19,6 +19,7 @@ import { SubjectModule } from './controller/subject/subject.module';
 import { RegionalModule } from './controller/regional/regional.module';
 import { StatisticsModule } from './controller/statistics/statistics.module';
 import { ClassesModule } from './controller/classes/classes.module';
+import { AchievementModule } from './controller/achievement/achievement.module';
 
 import { join } from 'path';
 
@@ -87,6 +88,10 @@ import { join } from 'path';
         module: StatisticsModule,
       },
       {
+        path: 'v1/achievement',
+        module: AchievementModule,
+      },
+      {
         path: 'v1/public',
         module: PublicModule,
       },
@@ -113,6 +118,7 @@ import { join } from 'path';
     RegionalModule,
     StatisticsModule,
     ClassesModule,
+    AchievementModule,
   ],
 })
 export class AppModule {}
