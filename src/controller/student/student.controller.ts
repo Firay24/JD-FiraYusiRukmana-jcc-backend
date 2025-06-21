@@ -215,7 +215,7 @@ export class StudentController {
         class: participant.Student.Class,
         stage: participant.Student.Stage,
         mapel: participant.Competition.Subject.Name,
-        room: participant.CompetitionRoom.Room.Name,
+        room: participant.CompetitionRoom?.Room?.Name ?? '-',
       })),
     });
   }
