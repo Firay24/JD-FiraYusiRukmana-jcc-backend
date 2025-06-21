@@ -56,7 +56,7 @@ export class ActivityController {
 
     const dbActivity = await this.prismaService.competitionParticipant.findFirst({
       where: { Id: id },
-      include: { Competition: { include: { Subject: true, Season: true, Region: true } }, CompetitionRoom: { include: { Supervisor: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'asc' } } } } },
+      include: { Competition: { include: { Subject: true, Season: true, Region: true } }, CompetitionRoom: { include: { Supervisor: true, Room: true } }, Student: { include: { User: true, School: true } }, Payment: { include: { PaymentStatusHistory: { orderBy: { Date: 'asc' } } } } },
     });
 
     if (!dbActivity) {
@@ -101,7 +101,7 @@ export class ActivityController {
           subject: dbActivity.Competition.Subject.Name,
           date: dbActivity.Competition.Date,
           location: dbActivity.Competition.Location,
-          room: null,
+          room: dbActivity?.CompetitionRoom?.Room.Name || '',
           supervisor: '',
         },
         detailStatus: dbActivity.Payment.PaymentStatusHistory.map((history) => ({

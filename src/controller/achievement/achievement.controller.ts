@@ -159,6 +159,7 @@ export class AchievementController {
     const data = competitions.map((comp) => {
       const juaraList = comp.Achievement.map((ach) => ({
         name: ach.Student.User.Name,
+        studentId: ach.Student.Id,
         school: ach.Student.School.Name,
         class: ach.Student.Class,
         stage: ach.Student.Stage,
