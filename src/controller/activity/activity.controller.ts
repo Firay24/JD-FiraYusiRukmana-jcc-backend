@@ -552,13 +552,20 @@ export class ActivityController {
     const participantId = await this.utilityService.generateParticipantId(body.competitionId, body.studentId);
 
     // Ambil sertifNumber terbesar
-    let sertifNumber: number | null = null;
-    const maxSertif = await this.prismaService.competitionParticipant.aggregate({
-      _max: {
+    // let sertifNumber: number | null = null;
+    // Lebih aman cari sertifNumber max
+    const maxSertif = await this.prismaService.competitionParticipant.findFirst({
+      where: {
+        SertifNumber: { not: null },
+      },
+      orderBy: {
+        SertifNumber: 'desc',
+      },
+      select: {
         SertifNumber: true,
       },
     });
-    sertifNumber = (maxSertif._max.SertifNumber ?? 0) + 1;
+    const sertifNumber = (maxSertif?.SertifNumber ?? 0) + 1;
 
     const competition = await this.prismaService.competitionParticipant.upsert({
       where: { Id: competitionParticipantId },
@@ -675,6 +682,21 @@ export class ActivityController {
       paymentId = payment.Id;
     }
 
+    // Ambil SertifNumber terbesar dari seluruh peserta yang sudah terdaftar
+    const maxSertif = await this.prismaService.competitionParticipant.findFirst({
+      where: {
+        SertifNumber: { not: null },
+      },
+      orderBy: {
+        SertifNumber: 'desc',
+      },
+      select: {
+        SertifNumber: true,
+      },
+    });
+
+    let currentSertifNumber = (maxSertif?.SertifNumber ?? 0) + 1;
+
     const createdParticipants = [];
     for (const competitionId of body.competitionId) {
       const participantId = await this.utilityService.generateParticipantId(competitionId, body.studentId);
@@ -692,9 +714,11 @@ export class ActivityController {
           Correct: body.correct ?? 0,
           Incorrect: body.incorrect ?? 0,
           PathAnswer: body.pathAnswer ?? '',
+          SertifNumber: currentSertifNumber,
         },
       });
 
+      currentSertifNumber++;
       createdParticipants.push(competition);
     }
 

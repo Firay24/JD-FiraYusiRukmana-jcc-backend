@@ -12,10 +12,10 @@ dayjs.extend(utc);
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: ['https://jrchampionship.id', 'http://localhost:3000'],
+      origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       allowedHeaders: 'Content-Type, Accept',
-      credentials: true,
+      credentials: false,
     },
   });
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
