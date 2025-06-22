@@ -191,7 +191,17 @@ export class ActivityController {
       },
     });
 
-    const sortedActivities = dbActivity.filter((a) => a.Score !== null).sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0));
+    const withIndex = dbActivity.filter((a) => a.Index !== null && a.Index !== undefined);
+    const withoutIndex = dbActivity.filter((a) => a.Index === null || a.Index === undefined);
+
+    // Urutkan berdasarkan Index (semakin kecil semakin atas)
+    withIndex.sort((a, b) => (a.Index ?? 0) - (b.Index ?? 0));
+
+    // Urutkan sisanya berdasarkan Score
+    withoutIndex.sort((a, b) => (b.Score ?? 0) - (a.Score ?? 0));
+
+    // Gabungkan keduanya
+    const sortedActivities = [...withIndex, ...withoutIndex];
     const paginated = sortedActivities.slice(skip, skip + limit);
 
     return this.utilityService.globalResponse({
