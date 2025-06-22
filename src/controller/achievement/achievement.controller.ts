@@ -269,6 +269,7 @@ export class AchievementController {
         class: ach.Student.Class,
         stage: ach.Student.Stage,
         category: ach.Category ?? '',
+        subject: comp.Subject.Name,
         score: comp.CompetitionParticipant.find((cp) => cp.StudentId === ach.StudentId)?.Score ?? 0,
         certifNumber: comp.Achievement.find((cp) => cp.StudentId === ach.StudentId)?.SertifNumber ?? 0,
       }));
