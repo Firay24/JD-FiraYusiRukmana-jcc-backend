@@ -142,14 +142,14 @@ export class AchievementController {
       },
     });
 
-    if (topParticipants.length < 3) {
-      throw new BadRequestException(
-        this.utilityService.globalResponse({
-          statusCode: 400,
-          message: 'Not enough participants to determine top 3',
-        }),
-      );
-    }
+    // if (topParticipants.length < 3) {
+    //   throw new BadRequestException(
+    //     this.utilityService.globalResponse({
+    //       statusCode: 400,
+    //       message: 'Not enough participants to determine top 3',
+    //     }),
+    //   );
+    // }
 
     // Ambil sertif number tertinggi
     const maxSertif = await this.prismaService.achievement.findFirst({
@@ -164,7 +164,7 @@ export class AchievementController {
 
     const createdAchievements = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < topParticipants.length; i++) {
       const participant = topParticipants[i];
 
       const existing = await this.prismaService.achievement.findFirst({
