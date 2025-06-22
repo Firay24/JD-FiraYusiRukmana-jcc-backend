@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Role } from 'src/guard/roles/roles.enum';
@@ -97,6 +97,111 @@ export class AchievementController {
   }
   // #endRegion
 
+  @Post('create')
+  @Roles([Role.ADMIN, Role.EVENTADMIN, Role.SUPERADMIN])
+  async saveAchievementsFromTop3(@Req() request: Request, @Query('idCompetition') idCompetition: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    // Validasi competition
+    const competition = await this.prismaService.competition.findFirst({
+      where: { Id: idCompetition },
+    });
+
+    if (!competition) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 404,
+          message: 'Competition not found',
+        }),
+      );
+    }
+
+    // Ambil 3 nilai tertinggi
+    const topParticipants = await this.prismaService.competitionParticipant.findMany({
+      where: {
+        CompetitionId: idCompetition,
+        Score: { not: null },
+      },
+      orderBy: { Score: 'desc' },
+      take: 3,
+      include: {
+        Student: true,
+      },
+    });
+
+    if (topParticipants.length < 3) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'Not enough participants to determine top 3',
+        }),
+      );
+    }
+
+    // Ambil sertif number tertinggi
+    const maxSertif = await this.prismaService.achievement.findFirst({
+      where: { SertifNumber: { not: null } },
+      orderBy: { SertifNumber: 'desc' },
+      select: { SertifNumber: true },
+    });
+
+    let sertifNumber = (maxSertif?.SertifNumber ?? 0) + 1;
+
+    const categories = ['Juara 1', 'Juara 2', 'Juara 3'];
+
+    const createdAchievements = [];
+
+    for (let i = 0; i < 3; i++) {
+      const participant = topParticipants[i];
+
+      const existing = await this.prismaService.achievement.findFirst({
+        where: {
+          StudentId: participant.StudentId,
+          CompetitionId: idCompetition,
+        },
+      });
+
+      if (!existing) {
+        const achi = await this.prismaService.achievement.create({
+          data: {
+            Id: this.utilityService.generateUuid(),
+            StudentId: participant.StudentId,
+            CompetitionId: idCompetition,
+            SertifNumber: sertifNumber++,
+            Category: categories[i],
+            Describe: '',
+            Note: '',
+          },
+        });
+
+        createdAchievements.push({
+          id: achi.Id,
+          studentId: achi.StudentId,
+          category: achi.Category,
+        });
+      }
+    }
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Successfully created achievements for top 3 participants',
+      data: createdAchievements,
+    });
+  }
+
   // #region winner
   @Get('winner/:idregional')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.SUPERADMIN])
@@ -165,7 +270,7 @@ export class AchievementController {
         stage: ach.Student.Stage,
         category: ach.Category ?? '',
         score: comp.CompetitionParticipant.find((cp) => cp.StudentId === ach.StudentId)?.Score ?? 0,
-        certifNumber: comp.CompetitionParticipant.find((cp) => cp.StudentId === ach.StudentId)?.SertifNumber ?? 0,
+        certifNumber: comp.Achievement.find((cp) => cp.StudentId === ach.StudentId)?.SertifNumber ?? 0,
       }));
 
       // Urutkan juara dalam setiap kompetisi
