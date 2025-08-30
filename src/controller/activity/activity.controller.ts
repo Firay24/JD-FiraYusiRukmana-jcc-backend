@@ -248,8 +248,9 @@ export class ActivityController {
     }
 
     const dbActivity = await this.prismaService.competitionParticipant.findMany({
-      where: { CompetitionId: idCompetition },
+      where: { CompetitionId: idCompetition, CompetitionRoomId: null },
       include: { Student: { include: { User: true } } },
+      orderBy: { DateCreate: 'asc' },
     });
 
     return this.utilityService.globalResponse({
