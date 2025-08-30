@@ -247,20 +247,36 @@ export class ActivityController {
       );
     }
 
-    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+    const participantsWithoutRoom = await this.prismaService.competitionParticipant.findMany({
       where: { CompetitionId: idCompetition, CompetitionRoomId: null },
       include: { Student: { include: { User: true } } },
+      orderBy: { DateCreate: 'asc' },
+    });
+
+    const participantsWithRoom = await this.prismaService.competitionParticipant.findMany({
+      where: { CompetitionId: idCompetition, NOT: { CompetitionRoomId: null } },
+      include: { Student: { include: { User: true } }, CompetitionRoom: { include: { Room: true } } },
       orderBy: { DateCreate: 'asc' },
     });
 
     return this.utilityService.globalResponse({
       statusCode: 200,
       message: 'Success',
-      data: dbActivity.map((activity) => ({
-        idParticipant: activity.Id,
-        idMember: activity.Student.IdMember,
-        name: activity.Student.User.Name,
-      })),
+      data: {
+        totalParticipants: participantsWithRoom.length + participantsWithoutRoom.length,
+        participantsWithRoom: participantsWithRoom.length,
+        withoutRoom: participantsWithoutRoom.map((p) => ({
+          idParticipant: p.Id,
+          idMember: p.Student.IdMember,
+          name: p.Student.User.Name,
+        })),
+        withRoom: participantsWithRoom.map((p) => ({
+          idParticipant: p.Id,
+          idMember: p.Student.IdMember,
+          name: p.Student.User.Name,
+          room: p.CompetitionRoom.Room.Name,
+        })),
+      },
     });
   }
   // #endregion

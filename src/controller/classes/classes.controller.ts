@@ -26,6 +26,7 @@ interface AssignRoomDto {
   startIndex: number;
   endIndex: number;
   idMembers: string[];
+  newRoomName?: string;
 }
 
 @Controller()
@@ -55,22 +56,52 @@ export class ClassesController {
       );
     }
 
-    // Check CompetitionRoom
-    let compRoom = await this.prismaService.competitionRoom.findFirst({
-      where: {
-        CompetitionId: body.competitionId,
-        RoomId: body.roomId,
-      },
-    });
+    let compRoom;
 
-    if (!compRoom) {
+    // NEWROOM
+    if (body.newRoomName) {
+      const existingRoom = await this.prismaService.room.findFirst({
+        where: {
+          Name: body.newRoomName.toUpperCase(),
+        },
+      });
+
+      if (existingRoom) {
+        throw new Error(`Room ${body.newRoomName.toUpperCase()} already exists`);
+      }
+
+      const newRoom = await this.prismaService.room.create({
+        data: {
+          Id: this.utilityService.generateUuid(),
+          Name: body.newRoomName.toUpperCase(),
+        },
+      });
+
       compRoom = await this.prismaService.competitionRoom.create({
         data: {
           Id: this.utilityService.generateUuid(),
           CompetitionId: body.competitionId,
+          RoomId: newRoom.Id,
+        },
+      });
+    } else {
+      // room existing
+      compRoom = await this.prismaService.competitionRoom.findFirst({
+        where: {
+          CompetitionId: body.competitionId,
           RoomId: body.roomId,
         },
       });
+
+      if (!compRoom) {
+        compRoom = await this.prismaService.competitionRoom.create({
+          data: {
+            Id: this.utilityService.generateUuid(),
+            CompetitionId: body.competitionId,
+            RoomId: body.roomId,
+          },
+        });
+      }
     }
 
     // Search Participant
