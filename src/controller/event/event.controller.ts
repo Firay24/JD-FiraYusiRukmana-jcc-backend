@@ -123,6 +123,47 @@ export class EventController {
   }
   // #endregion
 
+  // #region list name
+  @Get('list/name/:idregional')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])
+  async listName(@Req() request: Request, @Param('idregional') idregional: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbEvent = await this.prismaService.competition.findMany({
+      where: { RegionId: idregional },
+      include: { Season: true, Subject: true },
+      orderBy: { Name: 'asc' },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbEvent.map((event) => {
+        const parts = event.Name.split('-');
+        const nameCompetition = parts[parts.length - 1].trim();
+
+        return {
+          id: event.Id,
+          name: nameCompetition,
+        };
+      }),
+    });
+  }
+  // #endregion
+
   // #region detail
   @Get('detail/:id')
   @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.PARTISIPANT, Role.FACILITATOR])

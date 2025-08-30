@@ -228,6 +228,42 @@ export class ActivityController {
 
   // #endregion
 
+  // #region list by idcompetition
+  @Get('participants/:idcompetition')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN, Role.FACILITATOR, Role.PARTISIPANT])
+  async listByIdCompetition(@Req() request: Request, @Param('idcompetition') idCompetition: string) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbActivity = await this.prismaService.competitionParticipant.findMany({
+      where: { CompetitionId: idCompetition },
+      include: { Student: { include: { User: true } } },
+    });
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbActivity.map((activity) => ({
+        idParticipant: activity.Id,
+        idMember: activity.Student.IdMember,
+        name: activity.Student.User.Name,
+      })),
+    });
+  }
+  // #endregion
+
   // #region attedance
   @Patch('attendance')
   @Roles([Role.ADMIN, Role.EVENTADMIN, Role.SUPERADMIN])

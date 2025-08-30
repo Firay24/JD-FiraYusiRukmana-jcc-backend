@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/guard/roles/roles.decorator';
 import { Request } from 'express';
 // import { Roles } from 'src/guard/roles/roles.decorator';
@@ -26,6 +26,36 @@ export class ClassesController {
     private prismaService: PrismaService,
     private utilityService: UtilityService,
   ) {}
+
+  @Get('list')
+  @Roles([Role.SUPERADMIN, Role.ADMIN, Role.EVENTADMIN])
+  async list(@Req() request: Request) {
+    const user = request.user;
+    const dbUser = await this.prismaService.user.findFirst({
+      where: { Id: user.id },
+      include: { Role: true },
+    });
+
+    if (!dbUser) {
+      throw new BadRequestException(
+        this.utilityService.globalResponse({
+          statusCode: 400,
+          message: 'User not found',
+        }),
+      );
+    }
+
+    const dbRoom = await this.prismaService.room.findMany();
+
+    return this.utilityService.globalResponse({
+      statusCode: 200,
+      message: 'Success',
+      data: dbRoom.map((room) => ({
+        id: room.Id,
+        name: room.Name,
+      })),
+    });
+  }
 
   @Post('save')
   @Roles([Role.SUPERADMIN, Role.ADMIN])
